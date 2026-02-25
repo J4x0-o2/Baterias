@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# PWA Baterías
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación Progressive Web App (PWA) para inspección y registro de baterías. Funciona completamente offline con sincronización automática cuando hay conexión.
 
-Currently, two official plugins are available:
+## 🚀 Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✅ Funciona completamente offline
+- ✅ Sincronización automática con Google Apps Script
+- ✅ Instalable en dispositivos móviles y desktop
+- ✅ Caché inteligente de recursos
+- ✅ Referencias de baterías personalizadas (IndexedDB)
+- ✅ Validación de rangos (carga, peso, días)
+- ✅ Interfaz responsive
 
-## React Compiler
+## 📦 Tecnologías
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+- React 19 + TypeScript
+- Vite 7
+- Service Workers (offline-first)
+- IndexedDB (almacenamiento local)
+- CSS modular
 
-## Expanding the ESLint configuration
+## 🛠️ Desarrollo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Instalar dependencias
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Servidor de desarrollo
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Build para producción
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Vista previa del build
+npm preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🌐 Deploy
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Opción 1: GitHub Actions (Automático)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Sube tu código a GitHub
+2. Ve a Settings → Pages → Source → GitHub Actions
+3. El workflow `.github/workflows/deploy.yml` se ejecutará automáticamente en cada push a `main`
+
+### Opción 2: Deploy manual con gh-pages
+
+```bash
+npm run deploy
 ```
+
+### Configuración
+
+La app está configurada para desplegarse en: **https://j4x0-o2.github.io/Baterias/**
+
+- `base: '/Baterias/'` en `vite.config.ts`
+- Service Worker con scope dinámico
+- Manifest con rutas relativas
+
+## 📱 Instalación PWA
+
+Una vez desplegada, los usuarios pueden:
+1. Abrir la app en Chrome/Edge/Safari
+2. Click en "Instalar" o "Agregar a pantalla de inicio"
+3. Usar como app nativa
+
+## 📂 Estructura
+
+```
+src/
+├── components/       # Componentes UI
+├── modules/         
+│   ├── database/    # IndexedDB
+│   ├── references/  # Referencias de baterías
+│   ├── sync/        # Sincronización
+│   └── types/       # TypeScript types
+└── pwa/             # Utilidades PWA
+public/
+├── pwa/             # Service Workers
+│   ├── sw.js
+│   ├── swCache.js
+│   └── swOffline.js
+└── manifest.json    # PWA manifest
+```
+
+## 🔧 Configuración de Sincronización
+
+Actualiza la URL de tu Google Apps Script en `src/modules/sync/api.ts`:
+
+```typescript
+const API_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT';
+```
+
+---

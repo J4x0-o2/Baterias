@@ -8,10 +8,10 @@ const DYNAMIC_CACHE_NAME = `battref-dynamic-${CACHE_VERSION}`;
 
 // Recursos estáticos para pre-cachear (shell de la app)
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon.svg'
+  '/Baterias/',
+  '/Baterias/index.html',
+  '/Baterias/manifest.json',
+  '/Baterias/icons/icon.svg'
 ];
 
 //Pre-cachea los recursos estáticos durante la instalación
@@ -59,7 +59,7 @@ const cacheFirst = async (request) => {
     
     // Retornar página principal si es navegación
     if (request.mode === 'navigate') {
-      return caches.match('/');
+      return caches.match('/Baterias/');
     }
     
     throw error;

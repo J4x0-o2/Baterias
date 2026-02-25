@@ -2,7 +2,8 @@
 
 import { syncPendingRecords } from '../modules/sync';
 
-const SW_PATH = '/sw.js';
+const BASE_URL = import.meta.env.BASE_URL || '/';
+const SW_PATH = `${BASE_URL}sw.js`;
 type ConnectionCallback = (isOnline: boolean) => void;
 const connectionListeners: Set<ConnectionCallback> = new Set();
 let swRegistration: ServiceWorkerRegistration | null = null;
@@ -17,7 +18,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
   if (swRegistration) return swRegistration;
 
   try {
-    const registration = await navigator.serviceWorker.register(SW_PATH, { scope: '/' });
+    const registration = await navigator.serviceWorker.register(SW_PATH, { scope: BASE_URL });
     swRegistration = registration;
     console.log('[PWA] Service Worker registrado:', registration.scope);
 
