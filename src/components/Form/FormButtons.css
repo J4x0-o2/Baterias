@@ -1,0 +1,50 @@
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-buttons__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.form-buttons__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.form-buttons__btn--reset {
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.form-buttons__btn--reset:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.form-buttons__btn--save {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.form-buttons__btn--save:hover {
+  background-color: #2563eb;
+}
+
+.form-buttons__btn--save:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
