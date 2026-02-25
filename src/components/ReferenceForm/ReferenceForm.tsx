@@ -54,7 +54,6 @@ export const ReferenceForm = ({ isOpen, onClose, onSaved }: ReferenceFormProps) 
       const newReference: BatteryReference = {
         id: `custom-${generateId()}`,
         code: formData.code.trim(),
-        description: formData.code.trim(),
         cargaMin: formData.cargaMin ? parseFloat(formData.cargaMin) : undefined,
         cargaMax: formData.cargaMax ? parseFloat(formData.cargaMax) : undefined,
         pesoMin: formData.pesoMin ? parseFloat(formData.pesoMin) : undefined,
