@@ -4,7 +4,7 @@ export const Footer = () => {
   return (
     <footer className="footer">
       <p className="footer__text">
-        Records are saved locally and will sync when online.
+        Los registros se guardarán localmente; luego se sincronizarán automáticamente.
       </p>
     </footer>
   );
