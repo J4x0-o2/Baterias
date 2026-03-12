@@ -2,7 +2,7 @@
 //Estrategias de caché y constantes
 
 // Nombres de los caches
-const CACHE_VERSION = 'v4'; // !IMPORTANTE: Cambiar en cada build para invalidar cache
+const CACHE_VERSION = 'v5'; // !IMPORTANTE: Cambiar en cada build para invalidar cache
 const STATIC_CACHE_NAME = `battref-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `battref-dynamic-${CACHE_VERSION}`;
 
