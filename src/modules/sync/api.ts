@@ -14,7 +14,15 @@ export const API_CONFIG = {
   SYNC_INTERVAL: 5 * 60 * 1000,
 };
 
+import { Logger } from '../shared/logger';
+
 // Verificar si la API está configurada
 export const isApiConfigured = (): boolean => {
-  return Boolean(API_CONFIG.GOOGLE_SHEETS_URL);
+  const isConfigured = Boolean(API_CONFIG.GOOGLE_SHEETS_URL);
+  if (!isConfigured) {
+    Logger.warn('La API no está configurada. Revisa la variable VITE_GOOGLE_SHEETS_URL en .env');
+  } else {
+    Logger.info('API configurada, detectada URL:', API_CONFIG.GOOGLE_SHEETS_URL);
+  }
+  return isConfigured;
 };

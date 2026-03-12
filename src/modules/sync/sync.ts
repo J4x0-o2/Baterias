@@ -54,7 +54,7 @@ export const sendRecordsWithRetry = async (
     for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
       result = await sendRecord(record);
       if (result.success) break;
-      
+
       // Esperar antes de reintentar (backoff exponencial)
       if (attempt < API_CONFIG.MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
