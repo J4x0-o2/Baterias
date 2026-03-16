@@ -13,10 +13,12 @@ export const recordsDB: ISaveLocal = {
       createdAt: record.createdAt ?? new Date().toISOString()
     };
 
+    console.log('[DB] Saving record:', { id: recordToSave.id, synced: recordToSave.synced, createdAt: recordToSave.createdAt });
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readwrite');
       const store = transaction.objectStore(RECORDS_STORE);
-      const request = store.put(record);
+      const request = store.put(recordToSave);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -57,21 +59,33 @@ export const recordsDB: ISaveLocal = {
 
   async getPendingSync(): Promise<BatteryRecord[]> {
     const db = await initDB();
+    console.log('[DB] Querying pending records (synced=false)');
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readonly');
       const store = transaction.objectStore(RECORDS_STORE);
       const index = store.index('synced');
       const request = index.getAll(IDBKeyRange.only(false));
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        console.log('[DB] Query results:', { count: request.result.length, records: request.result.map(r => ({ id: r.id, synced: r.synced })) });
+        resolve(request.result);
+      };
+      request.onerror = () => {
+        console.error('[DB] Error querying pending records:', request.error);
+        reject(request.error);
+      };
     });
   },
 
   async markAsSynced(id: string): Promise<void> {
+    console.log('[DB] Marking record as synced:', id);
     const record = await this.getById(id);
     if (record) {
+      console.log('[DB] Found record, updating synced flag to true');
       record.synced = true;
       await this.save(record);
+      console.log('[DB] Record marked as synced successfully:', id);
+    } else {
+      console.warn('[DB] Record not found for marking as synced:', id);
     }
   },
 
