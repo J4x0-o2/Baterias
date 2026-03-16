@@ -6,6 +6,13 @@ import { initDB, RECORDS_STORE } from './initDB';
 export const recordsDB: ISaveLocal = {
   async save(record: BatteryRecord): Promise<void> {
     const db = await initDB();
+
+    const recordToSave = {
+      ...record,
+      synced: record.synced ?? false,
+      createdAt: record.createdAt ?? new Date().toISOString()
+    };
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readwrite');
       const store = transaction.objectStore(RECORDS_STORE);
