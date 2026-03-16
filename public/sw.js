@@ -1,7 +1,7 @@
-//Punto de entrada que importa los módulos de cache y offline
+//Service Worker Entry Point
+//Imports cache strategies and offline/sync handlers
 
-importScripts('./pwa/swCache.js', './pwa/swOffline.js');
+importScripts('./cache-strategies.js', './offline-sync.js');
 
-registerOfflineHandlers();
+console.log('[SW] Service Worker initialized - cache version:', CACHE_VERSION);
 
-console.log('[SW] Service Worker initialized');

@@ -21,7 +21,8 @@ export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => 
   try {
     const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // IMPORTANTE: Se usa text/plain para evitar bloqueos por CORS Preflight (OPTIONS) en Google Apps Script
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(record),
       signal: controller.signal,
     });
@@ -29,6 +30,7 @@ export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      console.error(`[Sync] Error enviando registro ${record.id}: HTTP ${response.status}`);
       return { success: false, recordId: record.id, error: `HTTP ${response.status}` };
     }
 
@@ -36,6 +38,7 @@ export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => 
   } catch (error) {
     clearTimeout(timeoutId);
     const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    console.error(`[Sync] EXCEPCIÓN enviando registro ${record.id}:`, error);
     return { success: false, recordId: record.id, error: errorMessage };
   }
 };

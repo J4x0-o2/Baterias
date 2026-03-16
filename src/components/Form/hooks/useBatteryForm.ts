@@ -5,6 +5,7 @@ import { getReferencesForSelect, getReferenceById } from '../../../modules/refer
 import { DEFAULT_FORM_VALUES } from '../../../modules/constants';
 import type { BatteryReference, BatteryRecord } from '../../../modules/types';
 import { recordsDB, generateId } from '../../../modules/database';
+import { syncPendingRecords } from '../../../modules/sync';
 import type { BatteryFormData, SelectOption, SaveStatus } from '../types';
 import { calcularDias } from '../utils';
 
@@ -101,6 +102,15 @@ export const useBatteryForm = (): UseBatteryFormReturn => {
       await recordsDB.save(record);
       setSaveStatus('success');
       setFormData(initialFormData);
+      
+      // Trigger sync immediately after saving
+      syncPendingRecords()
+        .then(({ synced, failed }) => {
+          console.log(`[Form] Sync triggered: ${synced} successful, ${failed} failed`);
+        })
+        .catch((error) => {
+          console.error('[Form] Error triggering sync:', error);
+        });
       
       // Limpiar mensaje después de 3 segundos
       setTimeout(() => setSaveStatus('idle'), 3000);
