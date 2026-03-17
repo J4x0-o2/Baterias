@@ -37,6 +37,22 @@ export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => 
       return { success: false, recordId: record.id, error: `HTTP ${response.status}` };
     }
 
+    const responseText = await response.text();
+    console.log(`[Sync] Response body for record ${record.id}:`, responseText);
+
+    // Google Apps Script returns 200 even on errors — check body content
+    let responseData: { status?: string; error?: string } = {};
+    try {
+      responseData = JSON.parse(responseText);
+    } catch {
+      // Response is not JSON — treat as success if HTTP 200
+    }
+
+    if (responseData.status === 'error' || responseData.error) {
+      console.error(`[Sync] Apps Script error for record ${record.id}:`, responseData.error || responseText);
+      return { success: false, recordId: record.id, error: responseData.error || 'Apps Script error' };
+    }
+
     console.log(`[Sync] Record ${record.id} sent successfully to Google Sheets`);
     return { success: true, recordId: record.id };
   } catch (error) {
