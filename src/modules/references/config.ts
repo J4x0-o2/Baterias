@@ -3,8 +3,8 @@
 import type { BatteryReference } from '../types';
 
 export const BATTERY_REFERENCES: BatteryReference[] = [
-  { id: '1', code: '244103506R', cargaMin: 12.7, cargaMax: 13.00, pesoMin: 14.80, pesoMax: 16.00 },
-  { id: '2', code: '244103318R', cargaMin: 12.7, cargaMax: 13.00, pesoMin: 16.55, pesoMax: 17.97 },
+  { id: '1', code: '244103506R', cargaMin: 12.7, cargaMax: 13.00, pesoMin: 14.800, pesoMax: 16.000 },
+  { id: '2', code: '244103318R', cargaMin: 12.7, cargaMax: 13.00, pesoMin: 16.550, pesoMax: 17.970 },
 ];
 
 export const getBatteryOptions = (): { value: string; label: string }[] => {

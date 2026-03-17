@@ -3,7 +3,6 @@
 export const API_CONFIG = {
   // URL del Google Apps Script Web App (configurar en .env o directamente)
   GOOGLE_SHEETS_URL: import.meta.env.VITE_GOOGLE_SHEETS_URL,
-  BEARER_KEY: import.meta.env.API_KEY,
   
   // Timeout para requests (ms)
   REQUEST_TIMEOUT: 30000,

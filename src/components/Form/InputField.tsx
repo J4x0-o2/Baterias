@@ -46,7 +46,7 @@ export const InputField = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        step={type === 'number' ? '0.01' : undefined}
+        step={type === 'number' ? '0.001' : undefined}
         readOnly={readOnly}
       />
     </div>

@@ -1,12 +1,4 @@
-/**
- * Service Worker Offline and Sync Handler
- * Manages offline functionality and triggers data synchronization
- */
 
-/**
- * Handles Service Worker installation
- * Pre-caches static assets for offline access
- */
 const handleInstall = (event) => {
   console.log('[SW] Installing Service Worker...');
   
@@ -22,10 +14,6 @@ const handleInstall = (event) => {
   );
 };
 
-/**
- * Handles Service Worker activation
- * Cleans up old caches and takes control of all clients
- */
 const handleActivate = (event) => {
   console.log('[SW] Activating Service Worker...');
   
@@ -41,11 +29,7 @@ const handleActivate = (event) => {
   );
 };
 
-/**
- * Handles fetch requests and applies appropriate caching strategies
- * - API requests (Google Apps Script): Network-first strategy
- * - Static assets: Cache-first strategy
- */
+
 const handleFetch = (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -85,12 +69,7 @@ const handleFetch = (event) => {
   event.respondWith(networkFirst(request));
 };
 
-/**
- * Handles messages from clients
- * Supports:
- * - SKIP_WAITING: Immediately activate new Service Worker version
- * - GET_VERSION: Return current cache version
- */
+
 const handleMessage = (event) => {
   const { type } = event.data || {};
   
@@ -110,10 +89,6 @@ const handleMessage = (event) => {
   }
 };
 
-/**
- * Handles Background Sync events
- * Triggered when connection is regained (if browser supports Background Sync API)
- */
 const handleSync = (event) => {
   console.log('[SW] Sync event triggered:', event.tag);
   
@@ -123,10 +98,6 @@ const handleSync = (event) => {
   }
 };
 
-/**
- * Notifies all connected clients to trigger synchronization
- * Clients will handle the actual sync via the app's sync module
- */
 const notifyClientsToSync = async () => {
   try {
     const clients = await self.clients.matchAll();
@@ -143,9 +114,7 @@ const notifyClientsToSync = async () => {
   }
 };
 
-/**
- * Registers all Service Worker event listeners
- */
+
 const registerEventHandlers = () => {
   self.addEventListener('install', handleInstall);
   self.addEventListener('activate', handleActivate);
