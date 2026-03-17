@@ -94,13 +94,15 @@ const networkFirst = async (request) => {
   try {
     console.log('[SW Cache] Attempting network request:', request.url);
     const networkResponse = await fetch(request);
-    
-    // Cache valid responses for future use
-    if (networkResponse.ok) {
+
+    // Only cache GET responses — POST/PUT/DELETE must never be cached.
+    // Caching a POST response (e.g. Google Apps Script API) could return a
+    // stale "success" on retry, silently dropping records.
+    if (networkResponse.ok && request.method === 'GET') {
       const cache = await caches.open(DYNAMIC_CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.log('[SW Cache] Network failed, trying cache:', request.url);
