@@ -1,10 +1,7 @@
-/**
- * Service Worker Cache Strategies
- * Handles cache management and cache-first/network-first fetch strategies
- */
+
 
 // Cache Configuration
-const CACHE_VERSION = 'v0.1.2'; // Increment on each build to invalidate cache
+const CACHE_VERSION = 'v1.0'; // Increment on each build to invalidate cache
 const STATIC_CACHE_NAME = `battref-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `battref-dynamic-${CACHE_VERSION}`;
 
@@ -17,9 +14,6 @@ const STATIC_ASSETS = [
   '/Baterias/icons/icon.svg'
 ];
 
-/**
- * Pre-caches static assets during Service Worker installation
- */
 const precacheStaticAssets = async () => {
   try {
     const cache = await caches.open(STATIC_CACHE_NAME);
@@ -31,9 +25,6 @@ const precacheStaticAssets = async () => {
   }
 };
 
-/**
- * Removes old cache versions
- */
 const cleanOldCaches = async () => {
   try {
     const cacheNames = await caches.keys();
@@ -52,10 +43,6 @@ const cleanOldCaches = async () => {
   }
 };
 
-/**
- * Cache-first strategy: Check cache first, fall back to network
- * Used for static assets and resources that change infrequently
- */
 const cacheFirst = async (request) => {
   try {
     const cachedResponse = await caches.match(request);
@@ -87,10 +74,6 @@ const cacheFirst = async (request) => {
   }
 };
 
-/**
- * Network-first strategy: Try network first, fall back to cache
- * Used for API requests that should be fresh when possible
- */
 const networkFirst = async (request) => {
   try {
     console.log('[SW Cache] Attempting network request:', request.url);
