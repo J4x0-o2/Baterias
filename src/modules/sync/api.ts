@@ -2,7 +2,8 @@
 
 export const API_CONFIG = {
   // URL del Google Apps Script Web App (configurar en .env o directamente)
-  GOOGLE_SHEETS_URL: import.meta.env.VITE_GOOGLE_SHEETS_URL || '',
+  GOOGLE_SHEETS_URL: import.meta.env.VITE_GOOGLE_SHEETS_URL,
+  BEARER_KEY: import.meta.env.API_KEY,
   
   // Timeout para requests (ms)
   REQUEST_TIMEOUT: 30000,
@@ -11,7 +12,7 @@ export const API_CONFIG = {
   MAX_RETRIES: 3,
   
   // Intervalo de sincronización automática (ms) - 5 minutos
-  SYNC_INTERVAL: 5 * 60 * 1000,
+  SYNC_INTERVAL: 1 * 60 * 1000,
 };
 
 // Verificar si la API está configurada
