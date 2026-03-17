@@ -2,12 +2,18 @@
 
 import type { BatteryReference, BatteryRecord } from './battery';
 
+// Internal DB record — adds tracking fields on top of the form data
+export interface StoredRecord extends BatteryRecord {
+  id: string;
+  synced: boolean;
+}
+
 export interface ISaveLocal {
-  save(record: BatteryRecord): Promise<void>;
-  getAll(): Promise<BatteryRecord[]>;
-  getById(id: string): Promise<BatteryRecord | null>;
+  save(record: StoredRecord): Promise<void>;
+  getAll(): Promise<StoredRecord[]>;
+  getById(id: string): Promise<StoredRecord | null>;
   delete(id: string): Promise<void>;
-  getPendingSync(): Promise<BatteryRecord[]>;
+  getPendingSync(): Promise<StoredRecord[]>;
   markAsSynced(id: string): Promise<void>;
   clearAll(): Promise<void>;
 }

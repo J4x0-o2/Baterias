@@ -1,19 +1,18 @@
 // Implementación de ISaveLocal para registros de inspección
 
-import type { ISaveLocal, BatteryRecord } from '../types';
+import type { ISaveLocal, StoredRecord } from '../types';
 import { initDB, RECORDS_STORE } from './initDB';
 
 export const recordsDB: ISaveLocal = {
-  async save(record: BatteryRecord): Promise<void> {
+  async save(record: StoredRecord): Promise<void> {
     const db = await initDB();
 
     const recordToSave = {
       ...record,
       synced: record.synced ?? false,
-      createdAt: record.createdAt ?? new Date().toISOString()
     };
 
-    console.log('[DB] Saving record:', { id: recordToSave.id, synced: recordToSave.synced, createdAt: recordToSave.createdAt });
+    console.log('[DB] Saving record:', { id: recordToSave.id, synced: recordToSave.synced });
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readwrite');
@@ -24,7 +23,7 @@ export const recordsDB: ISaveLocal = {
     });
   },
 
-  async getAll(): Promise<BatteryRecord[]> {
+  async getAll(): Promise<StoredRecord[]> {
     const db = await initDB();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readonly');
@@ -35,7 +34,7 @@ export const recordsDB: ISaveLocal = {
     });
   },
 
-  async getById(id: string): Promise<BatteryRecord | null> {
+  async getById(id: string): Promise<StoredRecord | null> {
     const db = await initDB();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readonly');
@@ -57,7 +56,7 @@ export const recordsDB: ISaveLocal = {
     });
   },
 
-  async getPendingSync(): Promise<BatteryRecord[]> {
+  async getPendingSync(): Promise<StoredRecord[]> {
     const db = await initDB();
     console.log('[DB] Querying pending records (synced=false)');
     return new Promise((resolve, reject) => {

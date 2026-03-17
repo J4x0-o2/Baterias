@@ -1,6 +1,6 @@
 // Funciones de sincronización con Google Sheets
 
-import type { BatteryRecord } from '../types';
+import type { StoredRecord } from '../types';
 import { API_CONFIG, isApiConfigured } from './api';
 
 export interface SyncResult {
@@ -10,7 +10,7 @@ export interface SyncResult {
 }
 
 // Envía un registro individual a Google Sheets
-export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => {
+export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   if (!isApiConfigured()) {
     console.error('[Sync] API not configured - GOOGLE_SHEETS_URL is missing');
     return { success: false, recordId: record.id, error: 'API no configurada' };
@@ -21,12 +21,15 @@ export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
 
+  // Strip internal DB fields — id and synced are not columns in Google Sheets
+  const { id: _id, synced: _synced, ...payload } = record;
+
   try {
     const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
       method: 'POST',
       // IMPORTANTE: Se usa text/plain para evitar bloqueos por CORS Preflight (OPTIONS) en Google Apps Script
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(record),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
@@ -66,7 +69,7 @@ export const sendRecord = async (record: BatteryRecord): Promise<SyncResult> => 
 
 // Envía múltiples registros con reintentos
 export const sendRecordsWithRetry = async (
-  records: BatteryRecord[],
+  records: StoredRecord[],
   onProgress?: (completed: number, total: number) => void
 ): Promise<SyncResult[]> => {
   console.log(`[Sync] Starting batch send for ${records.length} records`);

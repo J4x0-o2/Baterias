@@ -13,7 +13,6 @@ export interface BatteryReference {
 }
 
 export interface BatteryRecord {
-  id: string;
   batteryReference: string;
   fechaInspeccion: string;
   fechaFabricacion: string;
@@ -29,6 +28,4 @@ export interface BatteryRecord {
   dias: string;
   observaciones: string;
   inspector: string;
-  createdAt: string;
-  synced: boolean;
 }

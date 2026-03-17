@@ -21,14 +21,14 @@ export const getAllReferences = async (): Promise<BatteryReference[]> => {
 export const getReferencesForSelect = async (): Promise<{ value: string; label: string }[]> => {
   const allRefs = await getAllReferences();
   return allRefs.map(ref => ({
-    value: ref.id,
+    value: ref.code,
     label: ref.description ? `${ref.code} - ${ref.description}` : ref.code,
   }));
 };
 
-export const getReferenceById = async (id: string): Promise<BatteryReference | undefined> => {
+export const getReferenceById = async (code: string): Promise<BatteryReference | undefined> => {
   const allRefs = await getAllReferences();
-  return allRefs.find(ref => ref.id === id);
+  return allRefs.find(ref => ref.code === code);
 };
 
 export const saveCustomReference = async (reference: BatteryReference): Promise<void> => {

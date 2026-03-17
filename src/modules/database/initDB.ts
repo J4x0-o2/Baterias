@@ -1,7 +1,7 @@
 // Inicialización de IndexedDB
 
 export const DB_NAME = 'BattRefDB';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 export const RECORDS_STORE = 'records';
 export const REFERENCES_STORE = 'customReferences';
 
@@ -28,23 +28,20 @@ export const initDB = (): Promise<IDBDatabase> => {
       const oldVersion = event.oldVersion;
 
       if (!db.objectStoreNames.contains(RECORDS_STORE)) {
-        const recordsStore = db.createObjectStore(RECORDS_STORE, { keyPath: 'id' });
-        // 'synced' index removed: IDB does not accept booleans as valid key values,
-        // so IDBKeyRange.only(false/true) always throws DataError. Query via getAll() + JS filter instead.
-        recordsStore.createIndex('createdAt', 'createdAt', { unique: false });
+        db.createObjectStore(RECORDS_STORE, { keyPath: 'id' });
       }
 
       if (!db.objectStoreNames.contains(REFERENCES_STORE)) {
         db.createObjectStore(REFERENCES_STORE, { keyPath: 'id' });
       }
 
-      // v1 → v2: drop the broken 'synced' boolean index from existing installs
-      if (oldVersion < 2 && db.objectStoreNames.contains(RECORDS_STORE)) {
+      // v1 → v2: drop the broken 'synced' boolean index
+      // v2 → v3: drop the 'createdAt' index (field removed from stored records)
+      if (oldVersion < 3 && db.objectStoreNames.contains(RECORDS_STORE)) {
         const transaction = (event.target as IDBOpenDBRequest).transaction!;
         const store = transaction.objectStore(RECORDS_STORE);
-        if (store.indexNames.contains('synced')) {
-          store.deleteIndex('synced');
-        }
+        if (store.indexNames.contains('synced')) store.deleteIndex('synced');
+        if (store.indexNames.contains('createdAt')) store.deleteIndex('createdAt');
       }
     };
   });

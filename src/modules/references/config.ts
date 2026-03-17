@@ -9,12 +9,12 @@ export const BATTERY_REFERENCES: BatteryReference[] = [
 
 export const getBatteryOptions = (): { value: string; label: string }[] => {
   return BATTERY_REFERENCES.map(ref => ({
-    value: ref.id,
+    value: ref.code,
     label: ref.description ? `${ref.code} - ${ref.description}` : ref.code,
   }));
 };
 
-export const getBatteryById = (id: string): BatteryReference | undefined => {
-  return BATTERY_REFERENCES.find(ref => ref.id === id);
+export const getBatteryById = (code: string): BatteryReference | undefined => {
+  return BATTERY_REFERENCES.find(ref => ref.code === code);
 };
 

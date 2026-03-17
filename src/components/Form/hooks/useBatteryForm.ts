@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getReferencesForSelect, getReferenceById } from '../../../modules/references';
 import { DEFAULT_FORM_VALUES } from '../../../modules/constants';
-import type { BatteryReference, BatteryRecord } from '../../../modules/types';
+import type { BatteryReference, StoredRecord } from '../../../modules/types';
 import { recordsDB, generateId } from '../../../modules/database';
 import { syncPendingRecords } from '../../../modules/sync';
 import type { BatteryFormData, SelectOption, SaveStatus } from '../types';
@@ -92,10 +92,9 @@ export const useBatteryForm = (): UseBatteryFormReturn => {
     setSaveStatus('idle');
     
     try {
-      const record: BatteryRecord = {
+      const record: StoredRecord = {
         ...formData,
         id: generateId(),
-        createdAt: new Date().toISOString(),
         synced: false,
       };
       
