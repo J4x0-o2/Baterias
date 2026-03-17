@@ -22,7 +22,18 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
 
   // Strip internal DB fields — id and synced are not columns in Google Sheets
-  const { id: _id, synced: _synced, ...payload } = record;
+  const { id: _id, synced: _synced, ...formFields } = record;
+
+  // Send numeric fields as actual numbers, not strings.
+  // Google Sheets (Spanish locale) auto-converts decimal strings like "12.7"
+  // into dates (DD.MM → July 12) producing wrong serial numbers.
+  const payload = {
+    ...formFields,
+    voltage: parseFloat(formFields.voltage) || formFields.voltage,
+    weight:  parseFloat(formFields.weight)  || formFields.weight,
+    formula: parseFloat(formFields.formula) || formFields.formula,
+    dias:    parseInt(formFields.dias, 10)  || formFields.dias,
+  };
 
   try {
     const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
