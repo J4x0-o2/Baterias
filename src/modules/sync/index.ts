@@ -8,5 +8,6 @@ export {
   startAutoSync,
   stopAutoSync,
   updatePendingCount,
+  onSyncComplete,
   type SyncStatus,
 } from './syncManager';

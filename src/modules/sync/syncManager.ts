@@ -1,8 +1,19 @@
 // Orquestador de sincronización
 
 import { recordsDB } from '../database';
-import { sendRecordsWithRetry } from './sync';
+import { sendRecordsWithRetry, type SyncResult } from './sync';
 import { API_CONFIG, isApiConfigured } from './api';
+
+type SyncCompleteListener = (results: SyncResult[], wasOnline: boolean) => void;
+const syncListeners: SyncCompleteListener[] = [];
+
+export const onSyncComplete = (fn: SyncCompleteListener): (() => void) => {
+  syncListeners.push(fn);
+  return () => {
+    const idx = syncListeners.indexOf(fn);
+    if (idx > -1) syncListeners.splice(idx, 1);
+  };
+};
 
 export interface SyncStatus {
   isRunning: boolean;
@@ -57,6 +68,7 @@ export const syncPendingRecords = async (
     }
 
     console.log('[SyncManager] Sending records to Google Sheets');
+    const wasOnline = navigator.onLine;
     const results = await sendRecordsWithRetry(pendingRecords, onProgress);
 
     // Marcar como sincronizados los exitosos
@@ -74,6 +86,8 @@ export const syncPendingRecords = async (
         failed++;
       }
     }
+
+    syncListeners.forEach(fn => fn(results, wasOnline));
 
     syncStatus.lastSync = new Date();
     const remainingPending = await recordsDB.getPendingSync();

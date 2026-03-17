@@ -69,6 +69,12 @@
   border: 1px solid #fecaca;
 }
 
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
 .header__status-icon {
   width: 16px;
   height: 16px;

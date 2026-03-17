@@ -99,6 +99,7 @@ export const useBatteryForm = (): UseBatteryFormReturn => {
       };
       
       await recordsDB.save(record);
+      window.dispatchEvent(new CustomEvent('batteryRecordSaved'));
       setSaveStatus('success');
       setFormData(initialFormData);
       

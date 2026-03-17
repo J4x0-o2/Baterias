@@ -1,0 +1,205 @@
+/* ── Button in header ── */
+.dh-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.dh-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.dh-btn--pending {
+  background-color: #fefce8;
+  border-color: #fde68a;
+  color: #d97706;
+}
+
+.dh-btn--pending:hover {
+  background-color: #fef9c3;
+}
+
+.dh-btn--synced {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #059669;
+}
+
+.dh-btn--synced:hover {
+  background-color: #d1fae5;
+}
+
+.dh-btn__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.dh-btn__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: #fff;
+}
+
+.dh-btn__badge--pending { background-color: #d97706; }
+.dh-btn__badge--synced  { background-color: #059669; }
+
+/* ── Backdrop ── */
+.dh-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+}
+
+/* ── Modal ── */
+.dh-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  width: min(95vw, 600px);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dh-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dh-modal__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.dh-modal__close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.dh-modal__close:hover { color: #1f2937; }
+
+.dh-modal__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.dh-modal__synced-badge {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  border-radius: 9999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dh-modal__empty {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* ── List ── */
+.dh-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.dh-modal__list-header {
+  display: grid;
+  grid-template-columns: 28px 1fr 72px 72px 72px 72px;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f3f4f6;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+}
+
+.dh-entry {
+  display: grid;
+  grid-template-columns: 28px 1fr 72px 72px 72px 72px;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.dh-entry:last-child { border-bottom: none; }
+.dh-entry:hover { background-color: #fafafa; }
+
+.dh-entry__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dh-entry__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.dh-entry__icon--pending { color: #d97706; }
+.dh-entry__icon--failed  { color: #dc2626; }
+
+.dh-entry__ref {
+  font-weight: 500;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dh-entry__date,
+.dh-entry__value {
+  color: #6b7280;
+  text-align: center;
+}
