@@ -78,6 +78,14 @@ export const subscribeToConnectionChanges = (callback: ConnectionCallback): () =
 
 const handleOnline = (): void => {
   notifyConnectionChange(true);
+  // Always sync immediately on reconnection.
+  // triggerSync() uses the Background Sync API (Chrome/Edge only); on browsers
+  // that don't support it the sync event never fires, so we call syncPendingRecords
+  // directly as the primary path. The isRunning guard in syncManager prevents
+  // concurrent executions if the SW message also arrives.
+  syncPendingRecords().catch(err =>
+    console.error('[PWA] Sync on reconnect failed:', err)
+  );
   triggerSync();
 };
 

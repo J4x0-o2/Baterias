@@ -63,11 +63,13 @@ export const recordsDB: ISaveLocal = {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(RECORDS_STORE, 'readonly');
       const store = transaction.objectStore(RECORDS_STORE);
-      const index = store.index('synced');
-      const request = index.getAll(IDBKeyRange.only(false));
+      // IDBKeyRange.only(false) throws DataError: booleans are not valid IDB keys.
+      // Fetch all and filter in JS — also handles legacy records with synced=undefined.
+      const request = store.getAll();
       request.onsuccess = () => {
-        console.log('[DB] Query results:', { count: request.result.length, records: request.result.map(r => ({ id: r.id, synced: r.synced })) });
-        resolve(request.result);
+        const pending = request.result.filter(r => r.synced !== true);
+        console.log('[DB] Query results:', { count: pending.length, records: pending.map(r => ({ id: r.id, synced: r.synced })) });
+        resolve(pending);
       };
       request.onerror = () => {
         console.error('[DB] Error querying pending records:', request.error);

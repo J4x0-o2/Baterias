@@ -11,7 +11,7 @@ export interface SyncStatus {
   lastError?: string;
 }
 
-let syncStatus: SyncStatus = {
+const syncStatus: SyncStatus = {
   isRunning: false,
   lastSync: null,
   pendingCount: 0,

@@ -14,14 +14,19 @@ export const isCacheAvailable = (): boolean => {
 // Obtiene el tamaño total del cache en bytes
 export const getCacheSize = async (): Promise<number> => {
   if (!isCacheAvailable()) return 0;
-  
+
+  // Use caches.keys() so this stays correct across SW version bumps.
+  // CACHE_NAMES contains hardcoded version strings that may lag behind the SW.
+  const allCacheNames = await caches.keys();
+  const battrefCaches = allCacheNames.filter(name => name.startsWith('battref-'));
+
   let totalSize = 0;
-  
-  for (const cacheName of Object.values(CACHE_NAMES)) {
+
+  for (const cacheName of battrefCaches) {
     try {
       const cache = await caches.open(cacheName);
       const keys = await cache.keys();
-      
+
       for (const request of keys) {
         const response = await cache.match(request);
         if (response) {
@@ -33,7 +38,7 @@ export const getCacheSize = async (): Promise<number> => {
       // Ignorar errores de cache
     }
   }
-  
+
   return totalSize;
 };
 
