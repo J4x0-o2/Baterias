@@ -6,11 +6,13 @@ import { onSyncComplete } from '../../modules/sync';
 const CLEAR_HOUR = 23;
 const STORAGE_KEY = 'dailyHistoryClear';
 
+/** Retorna la fecha actual en formato ISO (YYYY-MM-DD) para comparaciones y almacenamiento. */
 function getTodayString(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Obtiene marca de tiempo del último borrado del historial diario desde almacenamiento local, retornando 0 si no existe o es de otro día. */
 function getLastClearTimestamp(): number {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -22,10 +24,12 @@ function getLastClearTimestamp(): number {
   }
 }
 
+/** Extrae marca de tiempo numérica del identificador de registro que tiene formato timestamp-uuid. */
 function getRecordTimestamp(id: string): number {
   return parseInt(id.split('-')[0], 10);
 }
 
+/** Valida si un registro pertenece al día actual y fue creado después del último borrado del historial. */
 function isTodayRecord(id: string, lastClear: number): boolean {
   const ts = getRecordTimestamp(id);
   const d = new Date(ts);
@@ -38,6 +42,7 @@ function isTodayRecord(id: string, lastClear: number): boolean {
   );
 }
 
+/** Detecta si un mensaje de error corresponde a problema de conectividad de red versus otros errores del servidor. */
 function isOfflineError(error?: string): boolean {
   if (!error) return false;
   const msg = error.toLowerCase();
@@ -54,6 +59,7 @@ export interface DailyHistoryEntry {
   failedOnline: boolean;
 }
 
+/** Hook que gestiona el estado del historial diario incluyendo cuenta de registros, entradas pendientes y sincronizaci\u00f3n autom\u00e1tica a las 23:00. */
 export const useDailyHistory = () => {
   const [todayCount, setTodayCount] = useState(0);
   const [pendingEntries, setPendingEntries] = useState<DailyHistoryEntry[]>([]);

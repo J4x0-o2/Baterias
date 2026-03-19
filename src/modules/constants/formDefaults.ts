@@ -1,5 +1,4 @@
-// Valores por defecto para el formulario de inspección
-
+/** Valores iniciales por defecto para campos del formulario de inspección de baterías. */
 export const DEFAULT_FORM_VALUES = {
   aspectoBornes: 'OK' as const,
   aspectoCalcomanias: 'OK' as const,

@@ -8,6 +8,7 @@ export interface StoredRecord extends BatteryRecord {
   synced: boolean;
 }
 
+/** Contrato de servicios para persistencia local de registros de inspección. */
 export interface ISaveLocal {
   save(record: StoredRecord): Promise<void>;
   getAll(): Promise<StoredRecord[]>;
@@ -18,6 +19,7 @@ export interface ISaveLocal {
   clearAll(): Promise<void>;
 }
 
+/** Contrato de servicios para persistencia de referencias de baterías personalizadas. */
 export interface IReferencesStorage {
   saveReference(reference: BatteryReference): Promise<void>;
   getAllReferences(): Promise<BatteryReference[]>;

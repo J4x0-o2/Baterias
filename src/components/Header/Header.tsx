@@ -5,6 +5,7 @@ interface HeaderProps {
   isOnline: boolean;
 }
 
+/** Encabezado de la aplicación con logo, título, botón de historial diario e indicador de estado online/offline. */
 export const Header = ({ isOnline }: HeaderProps) => {
   return (
     <header className="header">

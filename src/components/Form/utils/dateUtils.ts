@@ -1,5 +1,4 @@
-// Utilidades para cálculos de fechas
-
+/** Calcula diferencia en días entre dos fechas ISO, utilizado para determinar antigüedad de recarga en inspección. */
 export const calcularDias = (fechaInspeccion: string, fechaRecarga: string): number => {
   if (!fechaInspeccion || !fechaRecarga) return 0;
   

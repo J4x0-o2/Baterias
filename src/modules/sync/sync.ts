@@ -9,7 +9,7 @@ export interface SyncResult {
   error?: string;
 }
 
-// Envía un registro individual a Google Sheets
+/** Envía un registro individual a Google Sheets con manejo de timeout, parsing numérico y deteccion de errores del servidor. */
 export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   if (!isApiConfigured()) {
     console.error('[Sync] API not configured - GOOGLE_SHEETS_URL is missing');
@@ -78,7 +78,7 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   }
 };
 
-// Envía múltiples registros con reintentos
+/** Envía múltiples registros a Google Sheets con reintentos exponenciales y reporte de progreso. */
 export const sendRecordsWithRetry = async (
   records: StoredRecord[],
   onProgress?: (completed: number, total: number) => void

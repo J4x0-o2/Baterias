@@ -1,5 +1,4 @@
-// Tipos para referencias y registros de baterías
-
+/** Definición de tipo bateria con propiedades de identificación, descripción y rangos de validación opcional. */
 export interface BatteryReference {
   id: string;
   code: string;
@@ -12,6 +11,7 @@ export interface BatteryReference {
   isCustom?: boolean;
 }
 
+/** Estructura de datos capturados del formulario de inspección de batería sin campos de tracking. */
 export interface BatteryRecord {
   batteryReference: string;
   fechaInspeccion: string;

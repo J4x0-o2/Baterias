@@ -1,12 +1,15 @@
-// Inicialización de IndexedDB
-
+/** Nombre de la base de datos IndexedDB para almacenamiento local de baterías. */
 export const DB_NAME = 'BattRefDB';
+/** Versión actual del esquema IndexedDB. */
 export const DB_VERSION = 3;
+/** Nombre del object store para registros de inspección. */
 export const RECORDS_STORE = 'records';
+/** Nombre del object store para referencias personalizadas de baterías. */
 export const REFERENCES_STORE = 'customReferences';
 
 let dbInstance: IDBDatabase | null = null;
 
+/** Inicializa conexión con IndexedDB, creando stores y migrando esquema si es necesario, devuelve instancia cached en posteriores llamadas. */
 export const initDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
     if (dbInstance) {

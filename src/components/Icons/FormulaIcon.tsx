@@ -1,3 +1,4 @@
+/** Ícono SVG que representa fórmula o cálculo, utilizado en campo de fórmula. */
 export const FormulaIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <line x1="4" y1="9" x2="20" y2="9"/>

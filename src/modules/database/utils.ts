@@ -7,6 +7,7 @@ export const generateId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
+/** Retorna cantidad total de registros almacenados en IndexedDB. */
 export const getRecordsCount = async (): Promise<number> => {
   const db = await initDB();
   return new Promise((resolve, reject) => {
@@ -18,6 +19,7 @@ export const getRecordsCount = async (): Promise<number> => {
   });
 };
 
+/** Retorna cantidad de registros pendientes de sincronización. */
 export const getPendingSyncCount = async (): Promise<number> => {
   const records = await recordsDB.getPendingSync();
   return records.length;

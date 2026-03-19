@@ -8,6 +8,7 @@ interface DateFieldProps {
   icon?: React.ReactNode;
 }
 
+/** Campo de entrada de fecha con etiqueta opcional, icono y gestor de cambios. */
 export const DateField = ({
   label,
   name,

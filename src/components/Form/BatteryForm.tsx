@@ -24,6 +24,7 @@ import './BatteryForm.css';
 const okNokOptions = INSPECTION_OPTIONS.okNok;
 const siNoOptions = INSPECTION_OPTIONS.siNo;
 
+/** Formulario completo para ingreso de inspecciones de baterías con campos de referencia, fechas, validaciones visuales y sincronización automática. */
 export const BatteryForm = () => {
   const [showReferenceForm, setShowReferenceForm] = useState(false);
   

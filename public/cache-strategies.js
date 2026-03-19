@@ -1,5 +1,3 @@
-
-
 // Cache Configuration
 const CACHE_VERSION = 'v1.0'; // Increment on each build to invalidate cache
 const STATIC_CACHE_NAME = `battref-static-${CACHE_VERSION}`;

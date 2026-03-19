@@ -1,5 +1,3 @@
-// Hook para validación de rangos de batería
-
 import { useMemo } from 'react';
 import type { BatteryReference } from '../../../modules/types';
 
@@ -11,9 +9,8 @@ interface ValidationResult {
 
 const DIAS_MAX = 21;
 
-/**
- * Hook para validar carga, peso y días contra los rangos permitidos
- */
+
+/** Hook que valida rango de carga, peso y límite de días máximo contra valores de referencia seleccionada. */
 export const useBatteryValidation = (
   selectedReference: BatteryReference | null,
   voltage: string,

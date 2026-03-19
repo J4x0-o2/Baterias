@@ -13,6 +13,7 @@ interface InputFieldProps {
   hasError?: boolean;
 }
 
+/** Campo de entrada genérico que soporta tipos texto/número, unidades opcionales, estado readonly y validación visual de errores. */
 export const InputField = ({
   label,
   name,

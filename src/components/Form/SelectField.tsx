@@ -15,6 +15,7 @@ interface SelectFieldProps {
   icon?: React.ReactNode;
 }
 
+/** Campo de selección múltiple con etiqueta, icono, placeholder y lista de opciones valor-etiqueta. */
 export const SelectField = ({
   label,
   name,

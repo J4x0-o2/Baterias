@@ -7,6 +7,7 @@ interface FormButtonsProps {
   isLoading?: boolean;
 }
 
+/** Componente con botones Reiniciar y Guardar que maneja estado deshabilitado dependiendo de validación y carga. */
 export const FormButtons = ({ onReset, onSave, isSaveDisabled = false, isLoading = false }: FormButtonsProps) => {
   return (
     <div className="form-buttons">

@@ -3,6 +3,7 @@ import { useDailyHistory } from './useDailyHistory';
 import { DailyHistoryModal } from './DailyHistoryModal';
 import './DailyHistory.css';
 
+/** Botón interactivo que muestra el estado de sincronización del día y abre modal con historial de registros pendientes o sincronizados. */
 export const DailyHistoryButton = () => {
   const [open, setOpen] = useState(false);
   const { todayCount, pendingEntries } = useDailyHistory();

@@ -8,12 +8,14 @@ interface Props {
   onClose: () => void;
 }
 
+/** Convierte fecha ISO (YYYY-MM-DD) al formato local (DD/MM) para visualización. */
 function formatDate(iso: string): string {
   if (!iso) return '—';
   const [, month, day] = iso.split('-');
   return `${day}/${month}`;
 }
 
+/** Icono de advertencia amarillo que indica registro pendiente de sincronización. */
 function PendingIcon() {
   return (
     <svg className="dh-entry__icon dh-entry__icon--pending" viewBox="0 0 24 24" fill="currentColor">
@@ -22,6 +24,7 @@ function PendingIcon() {
   );
 }
 
+/** Icono de error rojo que indica fallo de sincronización ligado a errores online no relacionados con conectividad. */
 function FailedIcon() {
   return (
     <svg className="dh-entry__icon dh-entry__icon--failed" viewBox="0 0 24 24" fill="currentColor">
@@ -30,6 +33,7 @@ function FailedIcon() {
   );
 }
 
+/** Modal que muestra resumen de registros del día con estado de sincronización y detalle de entradas pendientes o no sincronizadas. */
 export const DailyHistoryModal = ({ entries, todayCount, onClose }: Props) => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };

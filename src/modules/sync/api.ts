@@ -1,5 +1,4 @@
-// Configuración de API para sincronización con Google Sheets
-
+/** Configuración centralizada de parámetros de API, timeouts, reintentos e intervalos de sincronización automática. */
 export const API_CONFIG = {
   // URL del Google Apps Script Web App (configurar en .env o directamente)
   GOOGLE_SHEETS_URL: import.meta.env.VITE_GOOGLE_SHEETS_URL,
@@ -14,7 +13,7 @@ export const API_CONFIG = {
   SYNC_INTERVAL: 1 * 60 * 1000,
 };
 
-// Verificar si la API está configurada
+/** Valida si la API está correctamente configurada con URL de Google Sheets. */
 export const isApiConfigured = (): boolean => {
   return Boolean(API_CONFIG.GOOGLE_SHEETS_URL);
 };

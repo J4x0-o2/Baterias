@@ -15,6 +15,7 @@ export const onSyncComplete = (fn: SyncCompleteListener): (() => void) => {
   };
 };
 
+/** Estado actual del gestor de sincronización con información de ejecución, última sincronización y pendientes. */
 export interface SyncStatus {
   isRunning: boolean;
   lastSync: Date | null;
@@ -30,10 +31,10 @@ const syncStatus: SyncStatus = {
 
 let syncIntervalId: number | null = null;
 
-// Obtiene el estado actual de sincronización
+/** Retorna copia del estado actual de sincronización. */
 export const getSyncStatus = (): SyncStatus => ({ ...syncStatus });
 
-// Ejecuta sincronización de registros pendientes
+/** Ejecuta ciclo de sincronización de registros pendientes con reintentos, marca exitosos como sincronizados y notifica listeners. */
 export const syncPendingRecords = async (
   onProgress?: (completed: number, total: number) => void
 ): Promise<{ synced: number; failed: number }> => {
@@ -107,7 +108,7 @@ export const syncPendingRecords = async (
   }
 };
 
-// Inicia sincronización automática por intervalos
+/** Inicia sincronización automática periódica con intervalo configurable, ejecuta inmediatamente y luego cada intervalo. */
 export const startAutoSync = (): void => {
   if (syncIntervalId !== null) {
     console.warn('[SyncManager] Auto sync already running');
@@ -129,7 +130,7 @@ export const startAutoSync = (): void => {
   }, API_CONFIG.SYNC_INTERVAL);
 };
 
-// Detiene la sincronización automática
+/** Detiene la sincronización automática liberando el intervalo. */
 export const stopAutoSync = (): void => {
   if (syncIntervalId !== null) {
     console.log('[SyncManager] Stopping auto sync');
@@ -138,7 +139,7 @@ export const stopAutoSync = (): void => {
   }
 };
 
-// Actualiza el conteo de pendientes
+/** Actualiza y retorna cantidad de registros pendientes de sincronización. */
 export const updatePendingCount = async (): Promise<number> => {
   console.log('[SyncManager] Updating pending count');
   const records = await recordsDB.getPendingSync();

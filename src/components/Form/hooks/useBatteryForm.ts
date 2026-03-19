@@ -1,5 +1,3 @@
-// Hook para gestión del estado del formulario de batería
-
 import { useState, useEffect, useCallback } from 'react';
 import { getReferencesForSelect, getReferenceById } from '../../../modules/references';
 import { DEFAULT_FORM_VALUES } from '../../../modules/constants';
@@ -41,7 +39,7 @@ interface UseBatteryFormReturn {
 }
 
 
-//Hook para gestionar el estado completo del formulario de batería
+/** Hook que gestiona estado completo del formulario de batería incluyendo validación, cálculo automático de días y sincronización post-guardado. */
 export const useBatteryForm = (): UseBatteryFormReturn => {
   const [formData, setFormData] = useState<BatteryFormData>(initialFormData);
   const [saving, setSaving] = useState(false);

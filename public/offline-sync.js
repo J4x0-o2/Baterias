@@ -1,11 +1,15 @@
 
+//SERVICE WORKER INSTALLATION HANDLER
+//Caches static assets and activates the SW immediately
 const handleInstall = (event) => {
   console.log('[SW] Installing Service Worker...');
   
   event.waitUntil(
+    // Precache all static assets (HTML, JS, CSS, images)
     precacheStaticAssets()
       .then(() => {
         console.log('[SW] Service Worker installed successfully');
+        // Skip waiting and activate immediately (don't wait for old SW to unload)
         return self.skipWaiting();
       })
       .catch((error) => {
@@ -14,13 +18,17 @@ const handleInstall = (event) => {
   );
 };
 
+
+//Cleans up old caches and claims all clients
 const handleActivate = (event) => {
   console.log('[SW] Activating Service Worker...');
   
   event.waitUntil(
+    // Remove outdated cache versions
     cleanOldCaches()
       .then(() => {
         console.log('[SW] Service Worker activated successfully');
+        // Immediately claim all clients (don't wait for page reload)
         return self.clients.claim();
       })
       .catch((error) => {
@@ -30,6 +38,7 @@ const handleActivate = (event) => {
 };
 
 
+//FETCH REQUEST HANDLER
 const handleFetch = (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -76,6 +85,7 @@ const handleMessage = (event) => {
   console.log('[SW] Received message:', type);
   
   switch (type) {
+    // Command to skip waiting and activate new SW version immediately
     case 'SKIP_WAITING':
       console.log('[SW] Skipping waiting and activating new SW');
       self.skipWaiting();
@@ -89,6 +99,9 @@ const handleMessage = (event) => {
   }
 };
 
+
+//Triggered when device reconnects to network
+//Used to sync battery records that couldn't be sent while offline
 const handleSync = (event) => {
   console.log('[SW] Sync event triggered:', event.tag);
   
@@ -98,6 +111,8 @@ const handleSync = (event) => {
   }
 };
 
+
+//Sends sync trigger message to all active app clients
 const notifyClientsToSync = async () => {
   try {
     const clients = await self.clients.matchAll();
@@ -115,6 +130,8 @@ const notifyClientsToSync = async () => {
 };
 
 
+
+//Registers all Service Worker event listeners
 const registerEventHandlers = () => {
   self.addEventListener('install', handleInstall);
   self.addEventListener('activate', handleActivate);
@@ -125,5 +142,6 @@ const registerEventHandlers = () => {
   console.log('[SW] Event handlers registered');
 };
 
-// Initialize event handlers when the script loads
+
+// Activate all handlers when this script loads
 registerEventHandlers();

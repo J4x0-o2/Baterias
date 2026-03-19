@@ -29,6 +29,7 @@ const initialFormData: FormData = {
   pesoMax: '',
 };
 
+/** Modal para crear y guardar nuevas referencias de baterías con rangos validados de carga y peso. */
 export const ReferenceForm = ({ isOpen, onClose, onSaved }: ReferenceFormProps) => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [saving, setSaving] = useState(false);

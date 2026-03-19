@@ -10,6 +10,7 @@ interface TextAreaFieldProps {
   rows?: number;
 }
 
+/** Campo de área de texto con etiqueta, icono, placeholder y configuración de filas. */
 export const TextAreaField = ({
   label,
   name,
