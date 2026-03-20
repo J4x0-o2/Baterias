@@ -4,64 +4,82 @@ import { InputField } from './InputField';
 import { DateField } from './DateField';
 import { TextAreaField } from './TextAreaField';
 import { FormButtons } from './FormButtons';
+import { BatteryRow } from './BatteryRow';
 import { ReferenceForm } from '../ReferenceForm';
-import { INSPECTION_OPTIONS } from '../../modules/constants';
-import { useBatteryForm, useBatteryValidation } from './hooks';
+import { INSPECTOR_OPTIONS } from '../../modules/constants';
+import { useBatchBatteryForm } from './hooks';
 import {
   BatteryIcon,
   CalendarIcon,
-  CheckIcon,
   ClockIcon,
   FormulaIcon,
   NoteIcon,
   UserIcon,
-  VoltageIcon,
-  WeightIcon,
 } from '../Icons';
 import './BatteryForm.css';
 
-// Opciones desde el módulo de referencias
-const okNokOptions = INSPECTION_OPTIONS.okNok;
-const siNoOptions = INSPECTION_OPTIONS.siNo;
+/** Opciones del selector de cantidad: 1 a 20 baterías por lote. */
+const quantityOptions = Array.from({ length: 20 }, (_, i) => ({
+  value: String(i + 1),
+  label: String(i + 1),
+}));
 
-/** Formulario completo para ingreso de inspecciones de baterías con campos de referencia, fechas, validaciones visuales y sincronización automática. */
+/**
+ * Formulario de inspección en lote.
+ *
+ * Sección superior — campos fijos compartidos por todas las baterías:
+ *   referencia, cantidad, fechas, días, fórmula, inspector y observaciones.
+ *
+ * Sección inferior — una tarjeta por batería con botones de alternancia
+ *   para inspección visual y entradas numéricas de carga y peso.
+ */
 export const BatteryForm = () => {
   const [showReferenceForm, setShowReferenceForm] = useState(false);
-  
+
   const {
-    formData,
+    fixedData,
+    batteries,
+    quantity,
+    pendingQuantity,
     saving,
     saveStatus,
     batteryOptions,
     selectedReference,
     isFormValid,
-    handleFieldChange,
+    handleFixedFieldChange,
+    handleBatteryChange,
+    handleQuantityChange,
+    confirmQuantityReduction,
+    cancelQuantityReduction,
     handleReset,
     handleSave,
     loadBatteryOptions,
-  } = useBatteryForm();
+    lastSavedCount,
+  } = useBatchBatteryForm();
 
-  const { isCargaOutOfRange, isPesoOutOfRange, isDiasOutOfRange } = useBatteryValidation(
-    selectedReference,
-    formData.voltage,
-    formData.weight,
-    formData.dias
-  );
+  const isDiasOutOfRange = parseInt(fixedData.dias, 10) >= 21;
+
+  // El selector de cantidad muestra el valor pendiente mientras espera confirmación
+  const displayedQuantity = (pendingQuantity ?? quantity).toString();
 
   return (
     <>
       <form className="battery-form" onSubmit={(e) => e.preventDefault()}>
         <h2 className="battery-form__title">Nueva Inspeccion</h2>
-        
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Campos fijos                                                        */}
+        {/* ------------------------------------------------------------------ */}
         <div className="battery-form__fields">
-          {/* Referencia de batería */}
+
+          {/* Referencia + botón agregar */}
           <div className="battery-form__reference-row">
             <SelectField
               label="Referencia de bateria"
               name="batteryReference"
               placeholder="Seleccionar referencia"
-              value={formData.batteryReference}
-              onChange={handleFieldChange('batteryReference')}
+              value={fixedData.batteryReference}
+              onChange={handleFixedFieldChange('batteryReference')}
               options={batteryOptions}
               icon={<BatteryIcon />}
             />
@@ -75,167 +93,147 @@ export const BatteryForm = () => {
             </button>
           </div>
 
-        {/* Fechas */}
-        <div className="battery-form__row battery-form__row--3">
-          <DateField
-            label="Fecha inspeccion"
-            name="fechaInspeccion"
-            value={formData.fechaInspeccion}
-            onChange={handleFieldChange('fechaInspeccion')}
-            icon={<CalendarIcon />}
+          {/* Cantidad de baterías */}
+          <SelectField
+            label="Cantidad de baterias"
+            name="quantity"
+            value={displayedQuantity}
+            onChange={(v) => handleQuantityChange(parseInt(v, 10))}
+            options={quantityOptions}
+            icon={<BatteryIcon />}
           />
-          <DateField
-            label="Fecha fabricacion"
-            name="fechaFabricacion"
-            value={formData.fechaFabricacion}
-            onChange={handleFieldChange('fechaFabricacion')}
-            icon={<CalendarIcon />}
+
+          {/* Advertencia de reducción de cantidad */}
+          {pendingQuantity !== null && (
+            <div className="battery-form__quantity-warning">
+              <p className="battery-form__quantity-warning-text">
+                Reducir a {pendingQuantity} eliminará las últimas{' '}
+                {batteries.length - pendingQuantity} batería(s). ¿Desea continuar?
+              </p>
+              <div className="battery-form__quantity-warning-actions">
+                <button
+                  type="button"
+                  className="battery-form__warning-btn battery-form__warning-btn--cancel"
+                  onClick={cancelQuantityReduction}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="battery-form__warning-btn battery-form__warning-btn--delete"
+                  onClick={confirmQuantityReduction}
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Fechas */}
+          <div className="battery-form__row battery-form__row--3">
+            <DateField
+              label="Fecha inspeccion"
+              name="fechaInspeccion"
+              value={fixedData.fechaInspeccion}
+              onChange={handleFixedFieldChange('fechaInspeccion')}
+              icon={<CalendarIcon />}
+            />
+            <DateField
+              label="Fecha fabricacion"
+              name="fechaFabricacion"
+              value={fixedData.fechaFabricacion}
+              onChange={handleFixedFieldChange('fechaFabricacion')}
+              icon={<CalendarIcon />}
+            />
+            <DateField
+              label="Fecha recarga"
+              name="fechaRecarga"
+              value={fixedData.fechaRecarga}
+              onChange={handleFixedFieldChange('fechaRecarga')}
+              icon={<CalendarIcon />}
+            />
+          </div>
+
+          {/* Fórmula y Días */}
+          <div className="battery-form__row battery-form__row--2">
+            <InputField
+              label="Formula"
+              name="formula"
+              type="number"
+              placeholder="0"
+              value={fixedData.formula}
+              onChange={handleFixedFieldChange('formula')}
+              icon={<FormulaIcon />}
+            />
+            <InputField
+              label="Dias"
+              name="dias"
+              type="number"
+              placeholder="0"
+              value={fixedData.dias}
+              onChange={() => {}}
+              icon={<ClockIcon />}
+              readOnly
+              hasError={isDiasOutOfRange}
+            />
+          </div>
+
+          {/* Inspector y Observaciones */}
+          <SelectField
+            label="Inspector"
+            name="inspector"
+            placeholder="Seleccionar inspector"
+            value={fixedData.inspector}
+            onChange={handleFixedFieldChange('inspector')}
+            options={INSPECTOR_OPTIONS}
+            icon={<UserIcon />}
           />
-          <DateField
-            label="Fecha recarga"
-            name="fechaRecarga"
-            value={formData.fechaRecarga}
-            onChange={handleFieldChange('fechaRecarga')}
-            icon={<CalendarIcon />}
+          <TextAreaField
+            label="Observaciones"
+            name="observaciones"
+            placeholder="Escriba observaciones sobre la bateria..."
+            value={fixedData.observaciones}
+            onChange={handleFixedFieldChange('observaciones')}
+            icon={<NoteIcon />}
           />
         </div>
 
-        {/* Aspectos e inspección visual */}
-        <div className="battery-form__row battery-form__row--2">
-          <SelectField
-            label="Aspecto bornes"
-            name="aspectoBornes"
-            value={formData.aspectoBornes}
-            onChange={handleFieldChange('aspectoBornes')}
-            options={okNokOptions}
-            icon={<CheckIcon />}
-          />
-          <SelectField
-            label="Aspecto calcomanias"
-            name="aspectoCalcomanias"
-            value={formData.aspectoCalcomanias}
-            onChange={handleFieldChange('aspectoCalcomanias')}
-            options={okNokOptions}
-            icon={<CheckIcon />}
-          />
+        {/* ------------------------------------------------------------------ */}
+        {/* Lista de baterías individuales                                     */}
+        {/* ------------------------------------------------------------------ */}
+        <div className="battery-form__battery-list">
+          <h3 className="battery-form__battery-list-title">
+            Baterias ({batteries.length})
+          </h3>
+          {batteries.map((battery, index) => (
+            <BatteryRow
+              key={index}
+              index={index}
+              data={battery}
+              onChange={(field, value) => handleBatteryChange(index, field)(value)}
+              selectedReference={selectedReference}
+            />
+          ))}
         </div>
 
-        <div className="battery-form__row battery-form__row--2">
-          <SelectField
-            label="Tapones"
-            name="tapones"
-            value={formData.tapones}
-            onChange={handleFieldChange('tapones')}
-            options={okNokOptions}
-            icon={<CheckIcon />}
-          />
-          <SelectField
-            label="Aspecto general"
-            name="aspectoGeneral"
-            value={formData.aspectoGeneral}
-            onChange={handleFieldChange('aspectoGeneral')}
-            options={okNokOptions}
-            icon={<CheckIcon />}
-          />
-        </div>
+        {/* Mensajes de estado */}
+        {saveStatus === 'success' && (
+          <div className="battery-form__message battery-form__message--success">
+            ✓ {lastSavedCount > 1 ? `${lastSavedCount} registros guardados` : 'Registro guardado'} correctamente
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div className="battery-form__message battery-form__message--error">
+            ✗ Error al guardar los registros
+          </div>
+        )}
 
-        <SelectField
-          label="Presenta fugas"
-          name="presentaFugas"
-          value={formData.presentaFugas}
-          onChange={handleFieldChange('presentaFugas')}
-          options={siNoOptions}
-          icon={<CheckIcon />}
+        <FormButtons
+          onReset={handleReset}
+          onSave={handleSave}
+          isSaveDisabled={!isFormValid}
+          isLoading={saving}
         />
-
-        {/* Carga y Peso */}
-        <div className="battery-form__row battery-form__row--2">
-          <InputField
-            label="Carga"
-            name="voltage"
-            type="number"
-            placeholder="e.j. 12.6"
-            value={formData.voltage}
-            onChange={handleFieldChange('voltage')}
-            icon={<VoltageIcon />}
-            unit="V"
-            hasError={isCargaOutOfRange}
-          />
-          <InputField
-            label="Peso"
-            name="weight"
-            type="number"
-            placeholder="e.j. 25.4"
-            value={formData.weight}
-            onChange={handleFieldChange('weight')}
-            icon={<WeightIcon />}
-            unit="kg"
-            hasError={isPesoOutOfRange}
-          />
-        </div>
-
-        {/* Formula y Días */}
-        <div className="battery-form__row battery-form__row--2">
-          <InputField
-            label="Formula"
-            name="formula"
-            type="number"
-            placeholder="0"
-            value={formData.formula}
-            onChange={handleFieldChange('formula')}
-            icon={<FormulaIcon />}
-          />
-          <InputField
-            label="Dias"
-            name="dias"
-            type="number"
-            placeholder="0"
-            value={formData.dias}
-            onChange={() => {}}
-            icon={<ClockIcon />}
-            readOnly
-            hasError={isDiasOutOfRange}
-          />
-        </div>
-
-        {/* Observaciones e Inspector */}
-        <TextAreaField
-          label="Observaciones"
-          name="observaciones"
-          placeholder="Escriba observaciones sobre la bateria..."
-          value={formData.observaciones}
-          onChange={handleFieldChange('observaciones')}
-          icon={<NoteIcon />}
-        />
-
-        <InputField
-          label="Inspector"
-          name="inspector"
-          type="text"
-          placeholder="Nombre del inspector"
-          value={formData.inspector}
-          onChange={handleFieldChange('inspector')}
-          icon={<UserIcon />}
-        />
-      </div>
-
-      {saveStatus === 'success' && (
-        <div className="battery-form__message battery-form__message--success">
-          ✓ Registro guardado correctamente
-        </div>
-      )}
-      {saveStatus === 'error' && (
-        <div className="battery-form__message battery-form__message--error">
-          ✗ Error al guardar el registro
-        </div>
-      )}
-
-      <FormButtons 
-        onReset={handleReset}
-        onSave={handleSave}
-        isSaveDisabled={!isFormValid}
-        isLoading={saving}
-      />
       </form>
 
       <ReferenceForm
@@ -246,4 +244,3 @@ export const BatteryForm = () => {
     </>
   );
 };
-

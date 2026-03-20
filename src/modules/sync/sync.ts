@@ -21,8 +21,9 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
 
-  // Strip internal DB fields — id and synced are not columns in Google Sheets
-  const { id: _id, synced: _synced, ...formFields } = record;
+  // Strip only the internal sync flag — id is included so Apps Script can
+  // identify each record individually and avoid duplicate insertions.
+  const { synced: _synced, ...formFields } = record;
 
   // Send numeric fields as actual numbers, not strings.
   // Google Sheets (Spanish locale) auto-converts decimal strings like "12.7"

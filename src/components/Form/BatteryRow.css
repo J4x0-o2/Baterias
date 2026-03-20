@@ -1,0 +1,157 @@
+/* ==========================================================================
+   BatteryRow — tarjeta de inspección individual dentro de un lote
+   ========================================================================== */
+
+.battery-row {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.625rem;
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Número de batería -------------------------------------------------------- */
+
+.battery-row__header {
+  display: flex;
+  align-items: center;
+}
+
+.battery-row__number {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #374151;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 8px;
+  letter-spacing: 0.02em;
+}
+
+/* Botones de alternancia (TogglePill) -------------------------------------- */
+
+.battery-row__toggles {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toggle-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 62px;
+}
+
+.toggle-pill__group {
+  display: flex;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggle-pill__btn {
+  flex: 1;
+  padding: 7px 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  min-height: 34px;
+  letter-spacing: 0.01em;
+}
+
+.toggle-pill__btn:first-child {
+  border-right: 1px solid #d1d5db;
+}
+
+/* Estado activo — valor normal (OK / NO) */
+.toggle-pill__btn--normal {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+/* Estado activo — valor de anomalía (NOK / SI) */
+.toggle-pill__btn--anomaly {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+/* Estado inactivo explícito (no es necesario sobreescribir, es el default) */
+.toggle-pill__btn--inactive {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+.toggle-pill__label {
+  font-size: 0.65rem;
+  color: #6b7280;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* Entradas numéricas (Carga / Peso) --------------------------------------- */
+
+.battery-row__measurements {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.battery-row__input-group {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.battery-row__input-group:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.battery-row__input-group--error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.battery-row__input-group--error:focus-within {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.battery-row__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.625rem 0;
+  font-size: 1rem;
+  color: #1f2937;
+  background-color: transparent;
+  width: 100%;
+  min-width: 0;
+}
+
+.battery-row__input::placeholder {
+  color: #9ca3af;
+}
+
+.battery-row__unit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

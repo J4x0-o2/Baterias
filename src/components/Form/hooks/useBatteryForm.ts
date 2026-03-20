@@ -7,6 +7,13 @@ import { syncPendingRecords } from '../../../modules/sync';
 import type { BatteryFormData, SelectOption, SaveStatus } from '../types';
 import { calcularDias } from '../utils';
 
+/** Devuelve la fecha actual en formato ISO YYYY-MM-DD compatible con inputs tipo date. */
+const getTodayISO = (): string => new Date().toISOString().split('T')[0];
+
+/**
+ * Valores fijos del formulario que se reinician en cada nuevo registro.
+ * Las fechas de sesión se gestionan por separado mediante sessionDates.
+ */
 const initialFormData: BatteryFormData = {
   batteryReference: '',
   fechaInspeccion: '',
@@ -25,6 +32,14 @@ const initialFormData: BatteryFormData = {
   inspector: '',
 };
 
+/** Fechas que persisten entre registros consecutivos dentro de la misma sesión. */
+interface SessionDates {
+  /** Fecha de inspección: se inicializa con la fecha de hoy y se actualiza al cambiarla. */
+  fechaInspeccion: string;
+  /** Fecha de fabricación: vacía hasta que el operador la ingresa por primera vez. */
+  fechaFabricacion: string;
+}
+
 interface UseBatteryFormReturn {
   formData: BatteryFormData;
   saving: boolean;
@@ -39,9 +54,23 @@ interface UseBatteryFormReturn {
 }
 
 
-/** Hook que gestiona estado completo del formulario de batería incluyendo validación, cálculo automático de días y sincronización post-guardado. */
+/**
+ * Hook que gestiona el estado completo del formulario de batería incluyendo:
+ * - Fechas de sesión persistentes entre registros (fechaInspeccion y fechaFabricacion)
+ * - Cálculo automático de días entre fechaRecarga y fechaInspeccion
+ * - Validación, guardado en IndexedDB y sincronización post-guardado
+ */
 export const useBatteryForm = (): UseBatteryFormReturn => {
-  const [formData, setFormData] = useState<BatteryFormData>(initialFormData);
+  // Fechas que sobreviven entre resets de formulario dentro de la misma sesión
+  const [sessionDates, setSessionDates] = useState<SessionDates>({
+    fechaInspeccion: getTodayISO(),
+    fechaFabricacion: '',
+  });
+
+  const [formData, setFormData] = useState<BatteryFormData>({
+    ...initialFormData,
+    fechaInspeccion: getTodayISO(),
+  });
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [batteryOptions, setBatteryOptions] = useState<SelectOption[]>([]);
@@ -78,10 +107,17 @@ export const useBatteryForm = (): UseBatteryFormReturn => {
 
   const handleFieldChange = useCallback((field: keyof BatteryFormData) => (value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Persist sticky dates so the next record pre-fills with the last used value
+    if (field === 'fechaInspeccion' || field === 'fechaFabricacion') {
+      setSessionDates(prev => ({ ...prev, [field]: value }));
+    }
   }, []);
 
   const handleReset = useCallback(() => {
-    setFormData(initialFormData);
+    // Reinicio completo: vuelve a hoy en fechaInspeccion y vacía fechaFabricacion
+    const freshDates: SessionDates = { fechaInspeccion: getTodayISO(), fechaFabricacion: '' };
+    setSessionDates(freshDates);
+    setFormData({ ...initialFormData, ...freshDates });
     setSaveStatus('idle');
   }, []);
 
@@ -99,7 +135,8 @@ export const useBatteryForm = (): UseBatteryFormReturn => {
       await recordsDB.save(record);
       window.dispatchEvent(new CustomEvent('batteryRecordSaved'));
       setSaveStatus('success');
-      setFormData(initialFormData);
+      // Preserva las fechas de sesión para que el siguiente registro las herede
+      setFormData({ ...initialFormData, ...sessionDates });
       
       // Trigger sync immediately after saving
       syncPendingRecords()
@@ -118,7 +155,7 @@ export const useBatteryForm = (): UseBatteryFormReturn => {
     } finally {
       setSaving(false);
     }
-  }, [formData]);
+  }, [formData, sessionDates]);
 
   const isFormValid = Boolean(
     formData.batteryReference && 
