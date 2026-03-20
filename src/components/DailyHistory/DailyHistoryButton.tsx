@@ -3,12 +3,12 @@ import { useDailyHistory } from './useDailyHistory';
 import { DailyHistoryModal } from './DailyHistoryModal';
 import './DailyHistory.css';
 
-/** Botón interactivo que muestra el estado de sincronización del día y abre modal con historial de registros pendientes o sincronizados. */
+/** Botón interactivo que muestra el estado de sincronización del día y abre el modal con el historial completo de registros. */
 export const DailyHistoryButton = () => {
   const [open, setOpen] = useState(false);
-  const { todayCount, pendingEntries } = useDailyHistory();
+  const { todayCount, allTodayEntries } = useDailyHistory();
 
-  const hasPending = pendingEntries.length > 0;
+  const hasPending = allTodayEntries.some(e => !e.synced);
   const allSynced = todayCount > 0 && !hasPending;
 
   return (
@@ -45,7 +45,7 @@ export const DailyHistoryButton = () => {
 
       {open && (
         <DailyHistoryModal
-          entries={pendingEntries}
+          entries={allTodayEntries}
           todayCount={todayCount}
           onClose={() => setOpen(false)}
         />

@@ -31,6 +31,8 @@
 
 .form-field__input,
 .form-field__select {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.875rem 1rem;
   font-size: 1rem;
   color: #1f2937;

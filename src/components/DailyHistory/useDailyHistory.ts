@@ -57,22 +57,27 @@ function isOfflineError(error?: string): boolean {
 export interface DailyHistoryEntry {
   record: StoredRecord;
   failedOnline: boolean;
+  /** true cuando el registro ya fue enviado exitosamente a Google Sheets. */
+  synced: boolean;
 }
 
-/** Hook que gestiona el estado del historial diario incluyendo cuenta de registros, entradas pendientes y sincronizaci\u00f3n autom\u00e1tica a las 23:00. */
+/** Hook que gestiona el historial diario: expone todos los registros del día (sincronizados y pendientes) y aplica limpieza automática a las 23:00. */
 export const useDailyHistory = () => {
   const [todayCount, setTodayCount] = useState(0);
-  const [pendingEntries, setPendingEntries] = useState<DailyHistoryEntry[]>([]);
+  const [allTodayEntries, setAllTodayEntries] = useState<DailyHistoryEntry[]>([]);
   const failedOnlineIds = useRef(new Set<string>());
 
   const refresh = useCallback(async () => {
     const lastClear = getLastClearTimestamp();
     const all = await recordsDB.getAll();
     const today = all.filter(r => isTodayRecord(r.id, lastClear));
-    const pending = today.filter(r => !r.synced);
     setTodayCount(today.length);
-    setPendingEntries(
-      pending.map(r => ({ record: r, failedOnline: failedOnlineIds.current.has(r.id) }))
+    setAllTodayEntries(
+      today.map(r => ({
+        record: r,
+        failedOnline: failedOnlineIds.current.has(r.id),
+        synced: r.synced === true,
+      }))
     );
   }, []);
 
@@ -99,7 +104,7 @@ export const useDailyHistory = () => {
     });
   }, [refresh]);
 
-  // Auto-clear at 11 PM
+  // Auto-clear at 11 PM: hides all today's entries from the UI (records remain in IndexedDB)
   useEffect(() => {
     let timeoutId: number;
 
@@ -113,7 +118,7 @@ export const useDailyHistory = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: getTodayString(), ts: Date.now() }));
         failedOnlineIds.current.clear();
         setTodayCount(0);
-        setPendingEntries([]);
+        setAllTodayEntries([]);
         scheduleClear();
       }, target.getTime() - now.getTime());
     };
@@ -122,5 +127,5 @@ export const useDailyHistory = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  return { todayCount, pendingEntries };
+  return { todayCount, allTodayEntries };
 };
