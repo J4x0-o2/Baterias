@@ -41,6 +41,19 @@ const TogglePill = ({ label, options, value, onChange }: TogglePillProps) => {
 };
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Trunca la parte decimal de un string numérico al máximo de dígitos indicado. */
+function limitDecimals(value: string, max: number): string {
+  const dotIndex = value.indexOf('.');
+  if (dotIndex === -1) return value;
+  const decimals = value.slice(dotIndex + 1);
+  if (decimals.length > max) return value.slice(0, dotIndex + max + 1);
+  return value;
+}
+
+// ---------------------------------------------------------------------------
 // BatteryRow
 // ---------------------------------------------------------------------------
 
@@ -117,8 +130,8 @@ export const BatteryRow = ({ index, data, onChange, selectedReference }: Battery
             className="battery-row__input"
             placeholder="Carga"
             value={data.voltage}
-            onChange={(e) => onChange('voltage', e.target.value)}
-            step="0.001"
+            onChange={(e) => onChange('voltage', limitDecimals(e.target.value, 2))}
+            step="0.01"
             aria-label={`Carga batería ${index + 1}`}
           />
           <span className="battery-row__unit">V</span>
@@ -129,7 +142,7 @@ export const BatteryRow = ({ index, data, onChange, selectedReference }: Battery
             className="battery-row__input"
             placeholder="Peso"
             value={data.weight}
-            onChange={(e) => onChange('weight', e.target.value)}
+            onChange={(e) => onChange('weight', limitDecimals(e.target.value, 3))}
             step="0.001"
             aria-label={`Peso batería ${index + 1}`}
           />

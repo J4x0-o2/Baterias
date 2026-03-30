@@ -174,8 +174,25 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
       if (newQty === batteries.length) return;
 
       if (newQty < batteries.length) {
-        // Solicita confirmación antes de eliminar filas con datos
-        setPendingQuantity(newQty);
+        // Solo pide confirmación si alguna de las baterías a eliminar tiene datos
+        const toRemove = batteries.slice(newQty);
+        const hasData = toRemove.some(
+          b =>
+            b.voltage !== '' ||
+            b.weight !== '' ||
+            b.aspectoBornes !== DEFAULT_FORM_VALUES.aspectoBornes ||
+            b.aspectoCalcomanias !== DEFAULT_FORM_VALUES.aspectoCalcomanias ||
+            b.tapones !== DEFAULT_FORM_VALUES.tapones ||
+            b.aspectoGeneral !== DEFAULT_FORM_VALUES.aspectoGeneral ||
+            b.presentaFugas !== DEFAULT_FORM_VALUES.presentaFugas
+        );
+
+        if (hasData) {
+          setPendingQuantity(newQty);
+        } else {
+          setBatteries(prev => prev.slice(0, newQty));
+          setQuantity(newQty);
+        }
       } else {
         // Agrega filas vacías al final sin confirmación
         setBatteries(prev => [
