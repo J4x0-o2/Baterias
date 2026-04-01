@@ -21,20 +21,7 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
 
-  // Strip only the internal sync flag — id is included so Apps Script can
-  // identify each record individually and avoid duplicate insertions.
-  const { synced: _synced, ...formFields } = record;
-
-  // Send numeric fields as actual numbers, not strings.
-  // Google Sheets (Spanish locale) auto-converts decimal strings like "12.7"
-  // into dates (DD.MM → July 12) producing wrong serial numbers.
-  const payload = {
-    ...formFields,
-    voltage: parseFloat(formFields.voltage) || formFields.voltage,
-    weight:  parseFloat(formFields.weight)  || formFields.weight,
-    formula: parseFloat(formFields.formula) || formFields.formula,
-    dias:    parseInt(formFields.dias, 10)  || formFields.dias,
-  };
+  const payload = buildPayload(record);
 
   try {
     const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
@@ -79,12 +66,75 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   }
 };
 
-/** Envía múltiples registros a Google Sheets con reintentos exponenciales y reporte de progreso. */
+/** Construye el payload numérico de un registro eliminando el flag interno de sincronización. */
+function buildPayload(record: StoredRecord) {
+  const { synced: _synced, ...fields } = record;
+  return {
+    ...fields,
+    voltage: parseFloat(fields.voltage) || fields.voltage,
+    weight:  parseFloat(fields.weight)  || fields.weight,
+    formula: parseFloat(fields.formula) || fields.formula,
+    dias:    parseInt(fields.dias, 10)  || fields.dias,
+  };
+}
+
+/** Intenta enviar todos los registros en una sola petición POST (batch). Retorna true si el servidor los aceptó todos. */
+const sendBatch = async (records: StoredRecord[]): Promise<boolean> => {
+  console.log(`[Sync] Trying batch POST for ${records.length} records`);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
+
+  try {
+    const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(records.map(buildPayload)),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      console.warn(`[Sync] Batch POST HTTP error: ${response.status}`);
+      return false;
+    }
+
+    let data: { success?: boolean; error?: string } = {};
+    try { data = JSON.parse(await response.text()); } catch { /* respuesta no-JSON → tratar como éxito en 200 */ }
+
+    if (data.success === false || data.error) {
+      console.warn('[Sync] Batch POST rejected by server:', data.error);
+      return false;
+    }
+
+    console.log('[Sync] Batch POST accepted by server');
+    return true;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.warn('[Sync] Batch POST failed:', error instanceof Error ? error.message : error);
+    return false;
+  }
+};
+
+/** Envía múltiples registros a Google Sheets. Intenta primero como lote; si falla, reintenta cada registro individualmente con backoff exponencial. */
 export const sendRecordsWithRetry = async (
   records: StoredRecord[],
   onProgress?: (completed: number, total: number) => void
 ): Promise<SyncResult[]> => {
-  console.log(`[Sync] Starting batch send for ${records.length} records`);
+  console.log(`[Sync] Starting send for ${records.length} records`);
+
+  // — Intento en lote (solo cuando hay más de un registro) —
+  if (records.length > 1) {
+    const batchOk = await sendBatch(records);
+    if (batchOk) {
+      onProgress?.(records.length, records.length);
+      return records.map(r => ({ success: true, recordId: r.id }));
+    }
+    console.warn('[Sync] Batch failed — falling back to individual sends');
+  }
+
+  // — Fallback: envío uno a uno con reintentos —
   const results: SyncResult[] = [];
 
   for (let i = 0; i < records.length; i++) {
@@ -94,15 +144,11 @@ export const sendRecordsWithRetry = async (
     for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
       console.log(`[Sync] Attempt ${attempt}/${API_CONFIG.MAX_RETRIES} for record ${record.id}`);
       result = await sendRecord(record);
-      if (result.success) {
-        console.log(`[Sync] Record ${record.id} succeeded on attempt ${attempt}`);
-        break;
-      }
+      if (result.success) break;
 
-      // Esperar antes de reintentar (backoff exponencial)
       if (attempt < API_CONFIG.MAX_RETRIES) {
         const waitTime = 1000 * attempt;
-        console.log(`[Sync] Waiting ${waitTime}ms before retry for record ${record.id}`);
+        console.log(`[Sync] Waiting ${waitTime}ms before retry`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
       } else {
         console.error(`[Sync] Record ${record.id} failed after ${API_CONFIG.MAX_RETRIES} attempts`);
@@ -113,6 +159,6 @@ export const sendRecordsWithRetry = async (
     onProgress?.(i + 1, records.length);
   }
 
-  console.log(`[Sync] Batch send complete: ${results.filter(r => r.success).length}/${records.length} succeeded`);
+  console.log(`[Sync] Send complete: ${results.filter(r => r.success).length}/${records.length} succeeded`);
   return results;
 };
