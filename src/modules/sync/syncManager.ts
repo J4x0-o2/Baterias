@@ -30,6 +30,7 @@ const syncStatus: SyncStatus = {
 };
 
 let syncIntervalId: number | null = null;
+let onlineHandler: (() => void) | null = null;
 
 /** Retorna copia del estado actual de sincronización. */
 export const getSyncStatus = (): SyncStatus => ({ ...syncStatus });
@@ -108,7 +109,14 @@ export const syncPendingRecords = async (
   }
 };
 
-/** Inicia sincronización automática periódica con intervalo configurable, ejecuta inmediatamente y luego cada intervalo. */
+/**
+ * Inicia sincronización automática periódica con intervalo configurable.
+ * No ejecuta un ciclo inmediato al arrancar: el guardado del formulario
+ * dispara syncPendingRecords() directamente, evitando que el auto-sync
+ * bloquee registros recién guardados con su flag isRunning.
+ * Además, suscribe un listener al evento 'online' para sincronizar
+ * inmediatamente al recuperar conexión.
+ */
 export const startAutoSync = (): void => {
   if (syncIntervalId !== null) {
     console.warn('[SyncManager] Auto sync already running');
@@ -116,9 +124,13 @@ export const startAutoSync = (): void => {
   }
 
   console.log('[SyncManager] Starting auto sync with interval:', API_CONFIG.SYNC_INTERVAL, 'ms');
-  
-  // Sincronizar inmediatamente al iniciar
-  syncPendingRecords();
+
+  // Sincronizar al recuperar conexión
+  onlineHandler = () => {
+    console.log('[SyncManager] Device came online — triggering sync');
+    syncPendingRecords();
+  };
+  window.addEventListener('online', onlineHandler);
 
   syncIntervalId = window.setInterval(() => {
     if (navigator.onLine) {
@@ -130,12 +142,16 @@ export const startAutoSync = (): void => {
   }, API_CONFIG.SYNC_INTERVAL);
 };
 
-/** Detiene la sincronización automática liberando el intervalo. */
+/** Detiene la sincronización automática liberando el intervalo y el listener online. */
 export const stopAutoSync = (): void => {
   if (syncIntervalId !== null) {
     console.log('[SyncManager] Stopping auto sync');
     clearInterval(syncIntervalId);
     syncIntervalId = null;
+  }
+  if (onlineHandler !== null) {
+    window.removeEventListener('online', onlineHandler);
+    onlineHandler = null;
   }
 };
 

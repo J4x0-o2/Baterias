@@ -117,48 +117,56 @@ const sendBatch = async (records: StoredRecord[]): Promise<boolean> => {
   }
 };
 
-/** Envía múltiples registros a Google Sheets. Intenta primero como lote; si falla, reintenta cada registro individualmente con backoff exponencial. */
+/**
+ * Envía múltiples registros a Google Sheets.
+ *
+ * Estrategia:
+ * - 1 registro  → envío individual con reintentos y backoff exponencial.
+ * - N registros → intento en lote (una sola petición).
+ *   Si el lote falla NO se hace fallback individual: el servidor pudo haber
+ *   procesado la solicitud aunque el cliente no recibió respuesta (timeout),
+ *   y reenviar causaría duplicados en Sheets. Los registros quedan como
+ *   pendientes y el auto-sync los reintentará en el próximo ciclo.
+ */
 export const sendRecordsWithRetry = async (
   records: StoredRecord[],
   onProgress?: (completed: number, total: number) => void
 ): Promise<SyncResult[]> => {
   console.log(`[Sync] Starting send for ${records.length} records`);
 
-  // — Intento en lote (solo cuando hay más de un registro) —
+  // — Lote: sin fallback individual para evitar duplicados —
   if (records.length > 1) {
     const batchOk = await sendBatch(records);
     if (batchOk) {
       onProgress?.(records.length, records.length);
       return records.map(r => ({ success: true, recordId: r.id }));
     }
-    console.warn('[Sync] Batch failed — falling back to individual sends');
+    // El servidor pudo haber procesado el batch aunque la respuesta falló.
+    // Retornar todos como fallidos; el próximo ciclo de auto-sync reintentará.
+    console.warn('[Sync] Batch failed — records will retry on next auto-sync cycle (no individual fallback to prevent duplicates)');
+    onProgress?.(0, records.length);
+    return records.map(r => ({ success: false, recordId: r.id, error: 'Batch failed' }));
   }
 
-  // — Fallback: envío uno a uno con reintentos —
-  const results: SyncResult[] = [];
+  // — Un solo registro: reintentos con backoff exponencial —
+  const record = records[0];
+  let result: SyncResult = { success: false, recordId: record.id };
 
-  for (let i = 0; i < records.length; i++) {
-    const record = records[i];
-    let result: SyncResult = { success: false, recordId: record.id };
+  for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
+    console.log(`[Sync] Attempt ${attempt}/${API_CONFIG.MAX_RETRIES} for record ${record.id}`);
+    result = await sendRecord(record);
+    if (result.success) break;
 
-    for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
-      console.log(`[Sync] Attempt ${attempt}/${API_CONFIG.MAX_RETRIES} for record ${record.id}`);
-      result = await sendRecord(record);
-      if (result.success) break;
-
-      if (attempt < API_CONFIG.MAX_RETRIES) {
-        const waitTime = 1000 * attempt;
-        console.log(`[Sync] Waiting ${waitTime}ms before retry`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-      } else {
-        console.error(`[Sync] Record ${record.id} failed after ${API_CONFIG.MAX_RETRIES} attempts`);
-      }
+    if (attempt < API_CONFIG.MAX_RETRIES) {
+      const waitTime = 1000 * attempt;
+      console.log(`[Sync] Waiting ${waitTime}ms before retry`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    } else {
+      console.error(`[Sync] Record ${record.id} failed after ${API_CONFIG.MAX_RETRIES} attempts`);
     }
-
-    results.push(result);
-    onProgress?.(i + 1, records.length);
   }
 
-  console.log(`[Sync] Send complete: ${results.filter(r => r.success).length}/${records.length} succeeded`);
-  return results;
+  onProgress?.(1, 1);
+  console.log(`[Sync] Send complete: ${result.success ? 1 : 0}/1 succeeded`);
+  return [result];
 };
