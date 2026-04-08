@@ -67,9 +67,6 @@ export const BatteryForm = () => {
       <form className="battery-form" onSubmit={(e) => e.preventDefault()}>
         <h2 className="battery-form__title">Nueva Inspeccion</h2>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* Campos fijos                                                        */}
-        {/* ------------------------------------------------------------------ */}
         <div className="battery-form__fields">
 
           {/* Referencia + botón agregar */}
@@ -198,9 +195,6 @@ export const BatteryForm = () => {
           />
         </div>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* Lista de baterías individuales                                     */}
-        {/* ------------------------------------------------------------------ */}
         <div className="battery-form__battery-list">
           <h3 className="battery-form__battery-list-title">
             Baterias ({batteries.length})

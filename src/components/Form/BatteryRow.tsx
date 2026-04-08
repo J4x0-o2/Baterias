@@ -3,10 +3,7 @@ import type { BatteryReference } from '../../modules/types';
 import type { PerBatteryData } from './types';
 import './BatteryRow.css';
 
-// ---------------------------------------------------------------------------
 // TogglePill — botón de alternancia compacto para campos OK/NOK y NO/SI
-// ---------------------------------------------------------------------------
-
 interface TogglePillProps {
   label: string;
   /** Tupla [valorNormal, valorAnomalia]. El primero se colorea verde, el segundo rojo. */
@@ -40,10 +37,8 @@ const TogglePill = ({ label, options, value, onChange }: TogglePillProps) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
+// Helpers
 /** Trunca la parte decimal de un string numérico al máximo de dígitos indicado. */
 function limitDecimals(value: string, max: number): string {
   const dotIndex = value.indexOf('.');
@@ -53,10 +48,8 @@ function limitDecimals(value: string, max: number): string {
   return value;
 }
 
-// ---------------------------------------------------------------------------
-// BatteryRow
-// ---------------------------------------------------------------------------
 
+// BatteryRow
 interface BatteryRowProps {
   index: number;
   data: PerBatteryData;
@@ -65,13 +58,10 @@ interface BatteryRowProps {
   selectedReference: BatteryReference | null;
 }
 
-/**
- * Fila de inspección para una batería individual dentro de un lote.
- *
- * Estructura visual:
- * - Línea 1: número de batería + cinco botones de alternancia (aspecto visual).
- * - Línea 2: entradas numéricas de Carga (V) y Peso (kg) con validación de rango.
- */
+//Fila de inspección para una batería individual dentro de un lote
+//Estructura visual:
+//Línea 1: número de batería + cinco botones de alternancia (aspecto visual).
+//Línea 2: entradas numéricas de Carga (V) y Peso (kg) con validación de rango.
 export const BatteryRow = ({ index, data, onChange, selectedReference }: BatteryRowProps) => {
   // La validación de días es responsabilidad de los campos fijos; aquí solo carga y peso.
   const { isCargaOutOfRange, isPesoOutOfRange } = useBatteryValidation(

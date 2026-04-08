@@ -117,17 +117,7 @@ const sendBatch = async (records: StoredRecord[]): Promise<boolean> => {
   }
 };
 
-/**
- * Envía múltiples registros a Google Sheets.
- *
- * Estrategia:
- * - 1 registro  → envío individual con reintentos y backoff exponencial.
- * - N registros → intento en lote (una sola petición).
- *   Si el lote falla NO se hace fallback individual: el servidor pudo haber
- *   procesado la solicitud aunque el cliente no recibió respuesta (timeout),
- *   y reenviar causaría duplicados en Sheets. Los registros quedan como
- *   pendientes y el auto-sync los reintentará en el próximo ciclo.
- */
+//Envía múltiples registros a Google Sheets.
 export const sendRecordsWithRetry = async (
   records: StoredRecord[],
   onProgress?: (completed: number, total: number) => void

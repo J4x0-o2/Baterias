@@ -7,9 +7,6 @@ import { syncPendingRecords } from '../../../modules/sync';
 import { calcularDias } from '../utils';
 import type { BatchFixedData, PerBatteryData, SelectOption, SaveStatus } from '../types';
 
-// ---------------------------------------------------------------------------
-// Utilidades y constantes de módulo
-// ---------------------------------------------------------------------------
 
 /** Devuelve la fecha actual en formato ISO YYYY-MM-DD compatible con inputs tipo date. */
 const getTodayISO = (): string => new Date().toISOString().split('T')[0];
@@ -45,10 +42,8 @@ interface SessionDates {
   fechaFabricacion: string;
 }
 
-// ---------------------------------------------------------------------------
-// Interfaz pública del hook
-// ---------------------------------------------------------------------------
 
+// Interfaz pública del hook
 export interface UseBatchBatteryFormReturn {
   fixedData: BatchFixedData;
   batteries: PerBatteryData[];
@@ -73,18 +68,8 @@ export interface UseBatchBatteryFormReturn {
   loadBatteryOptions: () => Promise<void>;
 }
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
 
-/**
- * Gestiona el formulario de inspección en lote:
- * - Campos fijos compartidos (referencia, fechas, inspector, etc.)
- * - Array de datos por batería (aspecto visual, carga, peso)
- * - Selector de cantidad con confirmación al reducir
- * - Fechas de sesión persistentes entre lotes guardados
- * - Guardado múltiple en IndexedDB y sincronización post-guardado
- */
+//Gestiona el formulario de inspección en lote
 export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
   const [sessionDates, setSessionDates] = useState<SessionDates>({
     fechaInspeccion: getTodayISO(),
@@ -135,10 +120,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     load();
   }, [fixedData.batteryReference]);
 
-  // ---------------------------------------------------------------------------
-  // Manejadores de campos fijos
-  // ---------------------------------------------------------------------------
 
+  // Manejadores de campos fijos
   const handleFixedFieldChange = useCallback(
     (field: keyof BatchFixedData) => (value: string) => {
       setFixedData(prev => ({ ...prev, [field]: value }));
@@ -150,10 +133,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     []
   );
 
-  // ---------------------------------------------------------------------------
-  // Manejadores de baterías individuales
-  // ---------------------------------------------------------------------------
 
+  // Manejadores de baterías individuales
   const handleBatteryChange = useCallback(
     (index: number, field: keyof PerBatteryData) => (value: string) => {
       setBatteries(prev => {
@@ -165,10 +146,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     []
   );
 
-  // ---------------------------------------------------------------------------
-  // Gestión de cantidad
-  // ---------------------------------------------------------------------------
 
+  // Gestión de cantidad
   const handleQuantityChange = useCallback(
     (newQty: number) => {
       if (newQty === batteries.length) return;
@@ -216,10 +195,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     setPendingQuantity(null);
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Reset y guardado
-  // ---------------------------------------------------------------------------
 
+  // Reset y guardado
   const handleReset = useCallback(() => {
     const freshDates: SessionDates = { fechaInspeccion: getTodayISO(), fechaFabricacion: '' };
     setSessionDates(freshDates);
@@ -272,10 +249,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     }
   }, [batteries, fixedData, sessionDates]);
 
-  // ---------------------------------------------------------------------------
-  // Validación del formulario completo
-  // ---------------------------------------------------------------------------
 
+  // Validación del formulario completo
   const isFormValid = Boolean(
     fixedData.batteryReference &&
     fixedData.fechaInspeccion &&

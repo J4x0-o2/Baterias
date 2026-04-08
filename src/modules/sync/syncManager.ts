@@ -109,14 +109,7 @@ export const syncPendingRecords = async (
   }
 };
 
-/**
- * Inicia sincronización automática periódica con intervalo configurable.
- * No ejecuta un ciclo inmediato al arrancar: el guardado del formulario
- * dispara syncPendingRecords() directamente, evitando que el auto-sync
- * bloquee registros recién guardados con su flag isRunning.
- * Además, suscribe un listener al evento 'online' para sincronizar
- * inmediatamente al recuperar conexión.
- */
+//Inicia sincronización automática periódica con intervalo configurable.
 export const startAutoSync = (): void => {
   if (syncIntervalId !== null) {
     console.warn('[SyncManager] Auto sync already running');
