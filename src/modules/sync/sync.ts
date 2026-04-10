@@ -9,6 +9,18 @@ export interface SyncResult {
   error?: string;
 }
 
+/** Envía un payload al sheet de monitoreo de forma silenciosa (fire-and-forget, no bloquea ni afecta el flujo principal). */
+const sendToMonitor = (body: string): void => {
+  if (!API_CONFIG.GOOGLE_SHEETS_MONITOR_URL) return;
+  fetch(API_CONFIG.GOOGLE_SHEETS_MONITOR_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body,
+  }).catch((err) => {
+    console.warn('[Monitor] Error enviando al sheet de monitoreo:', err instanceof Error ? err.message : err);
+  });
+};
+
 /** Envía un registro individual a Google Sheets con manejo de timeout, parsing numérico y deteccion de errores del servidor. */
 export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   if (!isApiConfigured()) {
@@ -22,13 +34,17 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
 
   const payload = buildPayload(record);
+  const bodyStr = JSON.stringify(payload);
+
+  // Enviar al monitor en paralelo (no bloquea)
+  sendToMonitor(bodyStr);
 
   try {
     const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
       method: 'POST',
       // IMPORTANTE: Se usa text/plain para evitar bloqueos por CORS Preflight (OPTIONS) en Google Apps Script
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
+      body: bodyStr,
       signal: controller.signal,
     });
 
@@ -85,11 +101,16 @@ const sendBatch = async (records: StoredRecord[]): Promise<boolean> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.REQUEST_TIMEOUT);
 
+  const bodyStr = JSON.stringify(records.map(buildPayload));
+
+  // Enviar al monitor en paralelo (no bloquea)
+  sendToMonitor(bodyStr);
+
   try {
     const response = await fetch(API_CONFIG.GOOGLE_SHEETS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(records.map(buildPayload)),
+      body: bodyStr,
       signal: controller.signal,
     });
 
