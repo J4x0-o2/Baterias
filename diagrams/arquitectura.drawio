@@ -1,0 +1,174 @@
+<mxfile host="app.diagrams.net" version="21.0">
+  <diagram name="Arquitectura Baterias PWA" id="arch-baterias-001">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ══════════════════════════════════════════════════════════
+             GITHUB PAGES
+        ══════════════════════════════════════════════════════════ -->
+        <mxCell id="github" value="&lt;b&gt;GitHub Pages&lt;/b&gt;&lt;br&gt;hosting estático" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="720" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════════
+             DISPOSITIVO / NAVEGADOR (PWA)  —  contenedor principal
+        ══════════════════════════════════════════════════════════ -->
+        <mxCell id="browser" value="&lt;b&gt;Dispositivo / Navegador (PWA)&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;swimlaneLine=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="150" width="1560" height="420" as="geometry" />
+        </mxCell>
+
+        <!-- React App sub-contenedor -->
+        <mxCell id="react-app" value="React App" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="browser">
+          <mxGeometry x="20" y="40" width="760" height="360" as="geometry" />
+        </mxCell>
+
+        <mxCell id="battery-form" value="&lt;b&gt;BatteryForm&lt;/b&gt;&lt;br&gt;formulario batch&lt;br&gt;(N baterías por envío)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="react-app">
+          <mxGeometry x="20" y="40" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="daily-history" value="&lt;b&gt;DailyHistory&lt;/b&gt;&lt;br&gt;historial del día" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="react-app">
+          <mxGeometry x="20" y="155" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="header-footer" value="&lt;b&gt;Header / Footer&lt;/b&gt;&lt;br&gt;estado online / offline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="react-app">
+          <mxGeometry x="20" y="265" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="indexeddb" value="&lt;b&gt;IndexedDB&lt;/b&gt;&lt;br&gt;records { id, batchId, synced }&lt;br&gt;references" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="react-app">
+          <mxGeometry x="265" y="35" width="210" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sync-manager" value="&lt;b&gt;SyncManager&lt;/b&gt;&lt;br&gt;• auto-sync cada 5 min&lt;br&gt;• trigger al volver online&lt;br&gt;• guard isRunning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="react-app">
+          <mxGeometry x="265" y="185" width="210" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Service Worker sub-contenedor -->
+        <mxCell id="sw-sub" value="Service Worker" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="browser">
+          <mxGeometry x="840" y="40" width="700" height="360" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cache-first" value="&lt;b&gt;Cache First&lt;/b&gt;&lt;br&gt;Assets estáticos&lt;br&gt;(HTML, JS, CSS, SVG)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="sw-sub">
+          <mxGeometry x="20" y="40" width="220" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="network-first" value="&lt;b&gt;Network First&lt;/b&gt;&lt;br&gt;API Google Apps Script&lt;br&gt;(POST — nunca se cachea)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="sw-sub">
+          <mxGeometry x="20" y="150" width="220" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bg-sync" value="&lt;b&gt;Background Sync API&lt;/b&gt;&lt;br&gt;tag: sync-records&lt;br&gt;notifica clientes al reconectar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="sw-sub">
+          <mxGeometry x="20" y="260" width="220" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════════
+             GOOGLE CLOUD
+        ══════════════════════════════════════════════════════════ -->
+        <mxCell id="google" value="&lt;b&gt;Google Cloud&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="640" width="1300" height="380" as="geometry" />
+        </mxCell>
+
+        <mxCell id="as-main" value="&lt;b&gt;Apps Script — Hoja Principal&lt;/b&gt;&lt;br&gt;doPost() → insertBatteryBatch()&lt;br&gt;buildRow() → 15 columnas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="google">
+          <mxGeometry x="30" y="50" width="270" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="props-main" value="&lt;b&gt;PropertiesService&lt;/b&gt;&lt;br&gt;batchId → fila (idempotencia)&lt;br&gt;últimos 200 IDs (~5 KB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="google">
+          <mxGeometry x="30" y="178" width="270" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sheets-main" value="&lt;b&gt;Google Sheets DATOS&lt;/b&gt;&lt;br&gt;(hoja principal)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="google">
+          <mxGeometry x="55" y="298" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="as-copy" value="&lt;b&gt;Apps Script — Hoja Copia&lt;/b&gt;&lt;br&gt;doPost() + Telegram&lt;br&gt;buildRow() → 15 columnas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="google">
+          <mxGeometry x="480" y="50" width="270" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="props-copy" value="&lt;b&gt;PropertiesService&lt;/b&gt;&lt;br&gt;batchId → fila (idempotencia)&lt;br&gt;últimos 200 IDs (~5 KB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="google">
+          <mxGeometry x="480" y="178" width="270" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sheets-copy" value="&lt;b&gt;Google Sheets DATOS Copia&lt;/b&gt;&lt;br&gt;(monitor)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="google">
+          <mxGeometry x="505" y="298" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════════
+             TELEGRAM (servicio externo)
+        ══════════════════════════════════════════════════════════ -->
+        <mxCell id="telegram" value="&lt;b&gt;Telegram Bot&lt;/b&gt;&lt;br&gt;notificaciones de inserción" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#333333;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="750" width="210" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════════
+             EDGES
+        ══════════════════════════════════════════════════════════ -->
+
+        <!-- GitHub Pages → Browser -->
+        <mxCell id="e-gh" value="sirve bundle" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#666666;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="github" target="browser" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- BatteryForm → IndexedDB (save) -->
+        <mxCell id="e-form-idb" value="save()&lt;br&gt;synced=false, batchId" style="edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=9;" edge="1" source="battery-form" target="indexeddb" parent="react-app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- DailyHistory → IndexedDB (getAll) -->
+        <mxCell id="e-hist-idb" value="getAll()" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;fontSize=9;" edge="1" source="daily-history" target="indexeddb" parent="react-app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- IndexedDB → SyncManager (getPendingSync) -->
+        <mxCell id="e-idb-sync" value="getPendingSync()" style="edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=9;" edge="1" source="indexeddb" target="sync-manager" parent="react-app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SyncManager → IndexedDB (markAsSynced) -->
+        <mxCell id="e-sync-idb" value="markAsSynced()" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="sync-manager" target="indexeddb" parent="react-app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SyncManager → Apps Script Principal (POST batch) -->
+        <mxCell id="e-sync-asmain" value="HTTPS POST&lt;br&gt;JSON array + batchId&lt;br&gt;timeout 90s" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#0050ef;fontStyle=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="sync-manager" target="as-main" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SyncManager → Apps Script Copia (monitor, fire-and-forget) -->
+        <mxCell id="e-sync-ascopy" value="monitor (fire &amp; forget)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#0050ef;dashed=1;fontSize=9;" edge="1" source="sync-manager" target="as-copy" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Background Sync → SyncManager (TRIGGER_SYNC message) -->
+        <mxCell id="e-bgsync-sync" value="TRIGGER_SYNC msg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="bg-sync" target="sync-manager" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Apps Script Principal → PropertiesService Principal -->
+        <mxCell id="e-as-props-main" value="check / write batchId" style="edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=9;" edge="1" source="as-main" target="props-main" parent="google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PropertiesService Principal → Google Sheets DATOS -->
+        <mxCell id="e-props-sheets-main" value="setValues() si nuevo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=9;" edge="1" source="props-main" target="sheets-main" parent="google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Apps Script Copia → PropertiesService Copia -->
+        <mxCell id="e-as-props-copy" value="check / write batchId" style="edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=9;" edge="1" source="as-copy" target="props-copy" parent="google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PropertiesService Copia → Google Sheets DATOS Copia -->
+        <mxCell id="e-props-sheets-copy" value="setValues() si nuevo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=9;" edge="1" source="props-copy" target="sheets-copy" parent="google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Apps Script Copia → Telegram Bot -->
+        <mxCell id="e-as-telegram" value="UrlFetchApp&lt;br&gt;notificación" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#d79b00;fontSize=9;" edge="1" source="as-copy" target="telegram" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

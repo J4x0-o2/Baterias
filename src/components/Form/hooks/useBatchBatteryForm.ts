@@ -212,11 +212,16 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     setSaveStatus('idle');
 
     try {
+      // Un único batchId por envío de formulario: todos los registros del lote lo comparten.
+      // Apps Script usa este ID como clave de idempotencia — si el mismo batch llega dos veces
+      // (por ejemplo tras un timeout de red), lo ignora sin insertar duplicados.
+      const batchId = generateId();
       for (const battery of batteries) {
         const record: StoredRecord = {
           ...fixedData,
           ...battery,
           id: generateId(),
+          batchId,
           synced: false,
         };
         await recordsDB.save(record);

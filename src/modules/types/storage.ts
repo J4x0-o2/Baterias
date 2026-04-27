@@ -6,6 +6,9 @@ import type { BatteryReference, BatteryRecord } from './battery';
 export interface StoredRecord extends BatteryRecord {
   id: string;
   synced: boolean;
+  // Shared by all records of the same form submission; used as idempotency key
+  // so Apps Script can skip re-insertion if the same batch arrives twice (e.g. after a timeout retry).
+  batchId?: string;
 }
 
 /** Contrato de servicios para persistencia local de registros de inspección. */
