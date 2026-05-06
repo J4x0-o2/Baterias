@@ -13,16 +13,17 @@ Es una herramienta de campo diseñada para técnicos e inspectores que necesitan
 ## ¿Qué hace?
 
 - **Formulario de inspección en lote**: permite registrar entre 1 y N baterías en un solo envío. Todos comparten campos fijos (referencia, fechas, inspector) y cada batería tiene sus propios campos de inspección visual y mediciones.
-  - Referencia de batería (seleccionable o personalizada)
+  - Referencia de batería (seleccionable de lista predefinida o personalizada)
   - Fecha de inspección, fabricación y recarga
   - Inspección visual: aspecto de bornes, calcomanías, tapones, aspecto general y fugas
-  - Mediciones: carga (V) y peso (kg) con validación por rangos según la referencia
-  - Fórmula y días de uso (calculado automáticamente)
-  - Observaciones e identificación del inspector
+  - Mediciones: carga (V) y peso (kg) con validación por rangos según la referencia seleccionada
+  - Fórmula y días de uso (calculado automáticamente a partir de las fechas)
+  - Observaciones e identificación del inspector (seleccionable de lista)
+  - Confirmación antes de reducir la cantidad de baterías si hay datos sin guardar
 
-- **Gestión de referencias**: permite crear referencias personalizadas con rangos de carga y peso esperados. Si una medición está fuera de rango, el campo se resalta visualmente.
+- **Gestión de referencias**: crea referencias personalizadas con rangos de carga (V) y peso (kg). Si una medición está fuera del rango definido, el campo se resalta visualmente en rojo. Las referencias se persisten en IndexedDB y sobreviven recargas de la app.
 
-- **Historial diario**: visualización de los registros del día.
+- **Historial diario**: modal con todos los registros guardados en el día, incluyendo su estado de sincronización (pendiente / sincronizado).
 
 - **Sincronización automática con idempotencia**: cada 5 minutos intenta enviar los registros pendientes al Google Apps Script. Cada envío incluye un `batchId` único que el servidor verifica antes de insertar — si el mismo lote llega dos veces (por ejemplo, tras un timeout de red), el servidor lo ignora sin crear duplicados.
 
@@ -62,7 +63,7 @@ Es una herramienta de campo diseñada para técnicos e inspectores que necesitan
                                                [Telegram Bot]
 ```
 
-El almacenamiento local usa **IndexedDB** con dos stores: `records` (inspecciones pendientes/sincronizadas) y `customReferences` (referencias personalizadas).
+El almacenamiento local usa **IndexedDB** con dos stores: `records` (inspecciones, con campos `id`, `batchId`, `synced`) y `customReferences` (referencias personalizadas con rangos de validación).
 
 ---
 
@@ -160,9 +161,18 @@ Desde el navegador (Chrome, Edge, Safari en iOS):
 
 ---
 
+## Inspectores
+
+La lista de inspectores está en `src/modules/constants/inspectionOptions.ts` → `INSPECTOR_OPTIONS`. Para agregar o quitar inspectores, editar ese array y redesplegar.
+
+Inspectores activos: Luis Leal, Ferley Perez, Jhonatan Idarraga, Kevin Johan Morales, Vidalvis Quintana.
+
+---
+
 ## Notas para producción
 
 - Los `console.*` y sentencias `debugger` se eliminan automáticamente en el build de producción (`vite.config.ts` → `esbuild.drop`).
 - El Service Worker usa `skipWaiting()` al instalar, por lo que las actualizaciones se activan sin necesidad de cerrar todas las pestañas.
 - La sincronización tiene un guard `isRunning` que previene ejecuciones concurrentes dentro del mismo contexto de página.
 - El `batchId` de idempotencia se almacena en `PropertiesService` de Apps Script (los últimos 200 IDs, ~5 KB por hoja).
+- Cuando un batch falla, no hay fallback de envío individual: todos los registros quedan pendientes y se reintentan en el próximo ciclo. Esto evita duplicados en el caso en que el servidor procesó el batch pero la respuesta de red se perdió.
