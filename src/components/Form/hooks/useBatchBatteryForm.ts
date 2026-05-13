@@ -55,6 +55,7 @@ export interface UseBatchBatteryFormReturn {
   quantity: number;
   tipoInspeccion: 'produccion' | 'no-produccion';
   maxQuantity: number;
+  weightRequired: boolean;
   /** Valor distinto de null mientras el operador esperan confirmación de reducción de cantidad. */
   pendingQuantity: number | null;
   /** Cantidad de registros del último lote guardado; útil para el mensaje de éxito. */
@@ -285,12 +286,13 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
 
 
   // Validación del formulario completo
+  const weightRequired = tipoInspeccion === 'produccion';
   const isFormValid = Boolean(
     fixedData.batteryReference &&
     fixedData.fechaInspeccion &&
     fixedData.fechaRecarga &&
     fixedData.inspector &&
-    batteries.every(b => b.voltage && b.weight)
+    batteries.every(b => b.voltage && (!weightRequired || b.weight))
   );
 
   return {
@@ -299,6 +301,7 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     quantity,
     tipoInspeccion,
     maxQuantity: MAX_QUANTITY[tipoInspeccion],
+    weightRequired,
     pendingQuantity,
     lastSavedCount,
     saving,

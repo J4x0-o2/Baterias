@@ -56,13 +56,14 @@ interface BatteryRowProps {
   /** Callback unificado: recibe el campo y el nuevo valor. */
   onChange: (field: keyof PerBatteryData, value: string) => void;
   selectedReference: BatteryReference | null;
+  weightRequired: boolean;
 }
 
 //Fila de inspección para una batería individual dentro de un lote
 //Estructura visual:
 //Línea 1: número de batería + cinco botones de alternancia (aspecto visual).
 //Línea 2: entradas numéricas de Carga (V) y Peso (kg) con validación de rango.
-export const BatteryRow = ({ index, data, onChange, selectedReference }: BatteryRowProps) => {
+export const BatteryRow = ({ index, data, onChange, selectedReference, weightRequired }: BatteryRowProps) => {
   // La validación de días es responsabilidad de los campos fijos; aquí solo carga y peso.
   const { isCargaOutOfRange, isPesoOutOfRange } = useBatteryValidation(
     selectedReference,
@@ -129,7 +130,7 @@ export const BatteryRow = ({ index, data, onChange, selectedReference }: Battery
           <input
             type="number"
             className="battery-row__input"
-            placeholder="Peso"
+            placeholder={weightRequired ? 'Peso' : 'Peso (opcional)'}
             value={data.weight}
             onChange={(e) => onChange('weight', limitDecimals(e.target.value, 3))}
             step="0.001"

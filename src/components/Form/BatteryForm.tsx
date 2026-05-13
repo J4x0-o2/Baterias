@@ -41,6 +41,7 @@ export const BatteryForm = () => {
     quantity,
     tipoInspeccion,
     maxQuantity,
+    weightRequired,
     pendingQuantity,
     saving,
     saveStatus,
@@ -224,6 +225,7 @@ export const BatteryForm = () => {
               data={battery}
               onChange={(field, value) => handleBatteryChange(index, field)(value)}
               selectedReference={selectedReference}
+              weightRequired={weightRequired}
             />
           ))}
         </div>
