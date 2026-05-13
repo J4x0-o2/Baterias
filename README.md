@@ -1,37 +1,60 @@
-# BatteryForm — Inspección de Baterías
+# Inspección de Baterías — IDS
 
-Aplicación web progresiva (PWA) para el registro e inspección técnica de baterías industriales. Funciona completamente **sin conexión** y sincroniza los datos automáticamente con una hoja de cálculo de Google Sheets cuando hay red disponible.
+Aplicación web progresiva (PWA) para el registro e inspección técnica de baterías industriales. Funciona completamente **sin conexión** y sincroniza los datos automáticamente con Google Sheets cuando hay red disponible.
 
 ---
 
 ## ¿Qué es?
 
-Es una herramienta de campo diseñada para técnicos e inspectores que necesitan registrar el estado de baterías en entornos donde la conectividad no está garantizada. Los registros se almacenan localmente en el dispositivo y se envían a Google Sheets en cuanto se recupera la conexión.
+Herramienta de campo diseñada para técnicos e inspectores que registran el estado de baterías en entornos con conectividad intermitente. Los registros se almacenan localmente en el dispositivo y se envían a Google Sheets en cuanto se recupera la conexión.
 
 ---
 
 ## ¿Qué hace?
 
-- **Formulario de inspección en lote**: permite registrar entre 1 y N baterías en un solo envío. Todos comparten campos fijos (referencia, fechas, inspector) y cada batería tiene sus propios campos de inspección visual y mediciones.
-  - Referencia de batería (seleccionable de lista predefinida o personalizada)
-  - Fecha de inspección, fabricación y recarga
-  - Inspección visual: aspecto de bornes, calcomanías, tapones, aspecto general y fugas
-  - Mediciones: carga (V) y peso (kg) con validación por rangos según la referencia seleccionada
-  - Fórmula y días de uso (calculado automáticamente a partir de las fechas)
-  - Observaciones e identificación del inspector (seleccionable de lista)
-  - Confirmación antes de reducir la cantidad de baterías si hay datos sin guardar
+### Tipos de inspección
 
-- **Gestión de referencias**: crea referencias personalizadas con rangos de carga (V) y peso (kg). Si una medición está fuera del rango definido, el campo se resalta visualmente en rojo. Las referencias se persisten en IndexedDB y sobreviven recargas de la app.
+El formulario distingue dos modos de operación seleccionables al inicio:
 
-- **Historial diario**: modal con todos los registros guardados en el día, incluyendo su estado de sincronización (pendiente / sincronizado).
+- **Baterías - Producción** (por defecto): inspección del ciclo normal de producción. Los datos se insertan en la hoja `DATOS`.
+- **Baterías - No Producción**: inspección de baterías de ensamblaje para verificar su estado óptimo. Permite hasta 50 baterías por lote. Los datos se insertan en la hoja `DATOS 250`.
 
-- **Sincronización automática con idempotencia**: cada 5 minutos intenta enviar los registros pendientes al Google Apps Script. Cada envío incluye un `batchId` único que el servidor verifica antes de insertar — si el mismo lote llega dos veces (por ejemplo, tras un timeout de red), el servidor lo ignora sin crear duplicados.
+Ambos modos usan el mismo formato de columnas y el mismo endpoint de Apps Script; el servidor enruta a la hoja correcta según el campo `tipoInspeccion` del payload.
 
-- **Sincronización al reconectar**: el Service Worker y el módulo de sync disparan sincronización inmediata al recuperar la conexión (`online` event + Background Sync API).
+### Formulario de inspección en lote
 
-- **Estrategias de caché diferenciadas**:
-  - Assets estáticos (HTML, JS, CSS, imágenes): `Cache First`
-  - Peticiones a la API de Google Apps Script: `Network First` (los POST nunca se cachean)
+Registra entre 1 y N baterías en un solo envío. Todos comparten campos fijos y cada batería tiene sus propios campos individuales:
+
+- Tipo de inspección (Producción / No Producción)
+- Referencia de batería (lista predefinida o personalizada)
+- Fecha de inspección, fabricación y recarga
+- Inspección visual: aspecto de bornes, calcomanías, tapones, aspecto general y fugas
+- Mediciones: carga (V) y peso (kg) con validación visual por rangos según la referencia
+- Fórmula y días de uso (calculados automáticamente a partir de las fechas)
+- Observaciones e identificación del inspector
+- Confirmación antes de reducir cantidad si hay datos sin guardar
+
+**Capacidad por tipo:**
+| Tipo | Máximo de baterías por lote |
+|---|---|
+| Producción | 20 |
+| No Producción | 50 |
+
+### Gestión de referencias
+
+Crea referencias personalizadas con rangos de carga (V) y peso (kg). Si una medición queda fuera del rango, el campo se resalta en rojo. Las referencias se persisten en IndexedDB.
+
+### Historial
+
+- **Historial diario**: modal con los registros del día y su estado de sincronización.
+- **Historial completo**: muestra los últimos 300 registros ordenados por recencia.
+
+### Sincronización
+
+- **Automática cada 5 minutos** mientras hay conexión.
+- **Inmediata al reconectar**: el módulo `swOffline.ts` dispara sync al evento `online` + Background Sync API del SW.
+- **Idempotencia con `batchId`**: cada lote lleva un ID único que Apps Script verifica antes de insertar — si el mismo batch llega dos veces (por timeout de red), el servidor lo omite sin duplicar.
+- **Retención de 30 días**: los registros sincronizados con más de 30 días se eliminan automáticamente de IndexedDB al iniciar la app.
 
 ---
 
@@ -39,45 +62,48 @@ Es una herramienta de campo diseñada para técnicos e inspectores que necesitan
 
 ```
 [Operador]
-    │ llena formulario
+    │ selecciona tipo + llena formulario
     ▼
-[React App] ──────────────────────────────────────────────────────┐
-    │ save(record { id, batchId, synced=false })                    │
-    ▼                                                               │
-[IndexedDB]  ◄─── markAsSynced() ───  [SyncManager]               │
-    │                                  │ auto-sync 5 min            │
-    └──── getPendingSync() ────────────┘ + evento online            │
-                                        │                           │
-                               HTTPS POST (JSON + batchId)         │
-                                  timeout: 90s                      │
-                         ┌─────────────┴──────────────┐            │
-                         │                             │ (monitor)  │
-                         ▼                             ▼            │
-              [Apps Script Principal]     [Apps Script Hoja Copia] ─┘
+[React App]
+    │ save(record { id, batchId, tipoInspeccion, synced=false })
+    ▼
+[IndexedDB]  ◄─── markAsSynced() ───  [SyncManager]
+    │                                  │ auto-sync 5 min
+    └──── getPendingSync() ────────────┘ + evento online
+                                        │
+                               HTTPS POST (JSON + batchId + tipoInspeccion)
+                                  timeout: 90s
+                         ┌─────────────┴──────────────┐
+                         │                             │ (monitor, fire-and-forget)
+                         ▼                             ▼
+              [Apps Script Principal]     [Apps Script Hoja Copia]
                          │                             │
-              [PropertiesService]         [PropertiesService]
-              (batchId idempotencia)      (batchId idempotencia)
+                  getSheet(tipoInspeccion)      hoja fija: DATOS
                          │                             │
-              [Google Sheets DATOS]       [Google Sheets DATOS Copia]
-                                                       │
-                                               [Telegram Bot]
+              ┌──────────┴──────────┐         [PropertiesService]
+              ▼                     ▼         (batchId idempotencia)
+         [Hoja DATOS]        [Hoja DATOS 250]         │
+         (Producción)        (No Producción)   [Telegram Bot]
+              │
+    [PropertiesService]
+    (batchId idempotencia)
 ```
 
-El almacenamiento local usa **IndexedDB** con dos stores: `records` (inspecciones, con campos `id`, `batchId`, `synced`) y `customReferences` (referencias personalizadas con rangos de validación).
+IndexedDB tiene dos stores: `records` (con campos `id`, `batchId`, `tipoInspeccion`, `synced`) y `customReferences`.
 
 ---
 
 ## Tecnologías
 
-| Capa                 | Tecnología                                          |
-|----------------------|-----------------------------------------------------|
-| UI                   | React 19 + TypeScript                               |
-| Build                | Vite 7 + SWC                                        |
+| Capa | Tecnología |
+|---|---|
+| UI | React 19 + TypeScript |
+| Build | Vite 7 + SWC |
 | PWA / Service Worker | Service Worker manual (`public/sw.js`, sin Workbox) |
-| Almacenamiento local | IndexedDB (raw, sin wrapper)                        |
-| Backend de datos     | Google Apps Script (doPost) + Google Sheets         |
-| Notificaciones       | Telegram Bot (vía Apps Script)                      |
-| Deploy               | GitHub Pages (`gh-pages`)                           |
+| Almacenamiento local | IndexedDB (raw, sin wrapper) |
+| Backend de datos | Google Apps Script (doPost) + Google Sheets |
+| Notificaciones | Telegram Bot (vía Apps Script hoja copia) |
+| Deploy | GitHub Pages (`gh-pages`) |
 
 ---
 
@@ -101,11 +127,9 @@ npm install
 Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-# URL principal — Google Apps Script que inserta en la hoja de datos
+# URL principal — Apps Script que enruta a DATOS o DATOS 250 según tipoInspeccion
 VITE_GOOGLE_SHEETS_URL=https://script.google.com/macros/s/XXXXXXXX/exec
 
-# URL del monitor (opcional) — hoja copia que recibe los mismos datos y notifica por Telegram
-VITE_GOOGLE_SHEETS_MONITOR_URL=https://script.google.com/macros/s/YYYYYYYY/exec
 ```
 
 > Ambas Web Apps deben publicarse con acceso **"Cualquier persona"** y modo de ejecución como el usuario del despliegue.
@@ -130,49 +154,64 @@ npm run deploy
 
 ---
 
-## Instalación como PWA
-
-Desde el navegador (Chrome, Edge, Safari en iOS):
-
-1. Abre la URL de la aplicación.
-2. Aparecerá un banner o botón **"Instalar"** / **"Añadir a pantalla de inicio"**.
-3. Una vez instalada, la app se abre en modo standalone (sin barra del navegador) y funciona sin conexión.
-
----
-
 ## Variables de entorno
 
-| Variable                          | Requerida | Descripción                                                   |
-|-----------------------------------|-----------|---------------------------------------------------------------|
-| `VITE_GOOGLE_SHEETS_URL`          | Sí        | URL del Web App principal de Google Apps Script               |
-| `VITE_GOOGLE_SHEETS_MONITOR_URL`  | No        | URL del Web App de la hoja copia (monitor + Telegram). Si no se configura, el envío al monitor se omite silenciosamente. |
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `VITE_GOOGLE_SHEETS_URL` | Sí | URL del Apps Script principal. Maneja Producción y No Producción en un solo endpoint. |
+---
+
+## Apps Script
+
+El código completo de ambos scripts está documentado en `CODEGS.md` (gitignored).
+
+### Script principal (`DATOS` / `DATOS 250`)
+
+Lee el campo `tipoInspeccion` del payload y enruta a la hoja correspondiente del mismo libro:
+
+```javascript
+const CONFIG = {
+  SPREADSHEET_ID: "...",
+  SHEETS: {
+    'produccion':    'DATOS',
+    'no-produccion': 'DATOS 250',
+  }
+};
+```
+
+### Script hoja copia (monitor + Telegram)
+
+Recibe todos los registros (sin distinción de tipo), los inserta en su hoja `DATOS` y notifica por Telegram. Idempotencia gestionada de forma independiente con su propio `PropertiesService`.
 
 ---
 
 ## Scripts disponibles
 
-| Comando           | Descripción                            |
-|-------------------|----------------------------------------|
-| `npm run dev`     | Servidor de desarrollo con hot-reload  |
-| `npm run build`   | Compilación optimizada para producción |
-| `npm run preview` | Vista previa del build local           |
-| `npm run lint`    | Análisis estático con ESLint           |
-| `npm run deploy`  | Build + publicación en GitHub Pages    |
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo con hot-reload |
+| `npm run build` | Compilación optimizada para producción |
+| `npm run preview` | Vista previa del build local |
+| `npm run lint` | Análisis estático con ESLint |
+| `npm run deploy` | Build + publicación en GitHub Pages |
 
 ---
 
-## Inspectores
+## Inspectores registrados
 
-La lista de inspectores está en `src/modules/constants/inspectionOptions.ts` → `INSPECTOR_OPTIONS`. Para agregar o quitar inspectores, editar ese array y redesplegar.
+La lista está en `src/modules/constants/inspectionOptions.ts` → `INSPECTOR_OPTIONS`.
+Para agregar o quitar inspectores, editar ese array y redesplegar.
 
-Inspectores activos: Luis Leal, Ferley Perez, Jhonatan Idarraga, Kevin Johan Morales, Vidalvis Quintana.
+Activos: Luis Leal, Ferley Perez, Jhonatan Idarraga, Kevin Johan Morales, Vidalvis Quintana.
 
 ---
 
 ## Notas para producción
 
-- Los `console.*` y sentencias `debugger` se eliminan automáticamente en el build de producción (`vite.config.ts` → `esbuild.drop`).
-- El Service Worker usa `skipWaiting()` al instalar, por lo que las actualizaciones se activan sin necesidad de cerrar todas las pestañas.
-- La sincronización tiene un guard `isRunning` que previene ejecuciones concurrentes dentro del mismo contexto de página.
-- El `batchId` de idempotencia se almacena en `PropertiesService` de Apps Script (los últimos 200 IDs, ~5 KB por hoja).
-- Cuando un batch falla, no hay fallback de envío individual: todos los registros quedan pendientes y se reintentan en el próximo ciclo. Esto evita duplicados en el caso en que el servidor procesó el batch pero la respuesta de red se perdió.
+- `console.*` y `debugger` se eliminan automáticamente en build (`vite.config.ts` → `esbuild.drop`).
+- El `CACHE_VERSION` del SW se genera con `v${Date.now()}` en cada build — no requiere bump manual.
+- El SW usa `skipWaiting()` al instalar; las actualizaciones se activan sin cerrar pestañas.
+- Guard `isRunning` en `syncManager.ts` previene ejecuciones concurrentes en la misma pestaña.
+- El `batchId` de idempotencia se almacena en `PropertiesService` de cada Apps Script (últimos 200 IDs, ~5 KB).
+- Cuando un batch falla no hay fallback individual: todos quedan pendientes y reintentan en el próximo ciclo, evitando duplicados si el servidor procesó el batch pero la respuesta de red se perdió.
+- Registros de baterías antiguas en IDB sin `tipoInspeccion` se tratan como `'produccion'` por compatibilidad.
