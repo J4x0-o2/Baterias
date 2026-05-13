@@ -1,5 +1,5 @@
-// Cache Configuration
-const CACHE_VERSION = 'v2.0'; // Increment on each build to invalidate cache
+// Cache Configuration — versión inyectada en build por el plugin swVersionPlugin de vite.config.ts
+const CACHE_VERSION = 'v1778688541548';
 const STATIC_CACHE_NAME = `battref-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `battref-dynamic-${CACHE_VERSION}`;
 
@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
   '/Baterias/',
   '/Baterias/index.html',
   '/Baterias/manifest.json',
-  '/Baterias/icons/icon.svg'
+  '/Baterias/icons/FAV_IDS_BATERIAS.png'
 ];
 
 const precacheStaticAssets = async () => {
