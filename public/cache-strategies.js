@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
   '/Baterias/',
   '/Baterias/index.html',
   '/Baterias/manifest.json',
-  '/Baterias/icons/icon.svg'
+  '/Baterias/icons/FAV_IDS_BATERIAS.png'
 ];
 
 const precacheStaticAssets = async () => {
