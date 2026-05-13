@@ -281,7 +281,7 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     } finally {
       setSaving(false);
     }
-  }, [batteries, fixedData, sessionDates]);
+  }, [batteries, fixedData, sessionDates, tipoInspeccion]);
 
 
   // Validación del formulario completo
