@@ -30,7 +30,6 @@ const syncStatus: SyncStatus = {
 };
 
 let syncIntervalId: number | null = null;
-let onlineHandler: (() => void) | null = null;
 
 /** Retorna copia del estado actual de sincronización. */
 export const getSyncStatus = (): SyncStatus => ({ ...syncStatus });
@@ -40,7 +39,7 @@ export const syncPendingRecords = async (
   onProgress?: (completed: number, total: number) => void
 ): Promise<{ synced: number; failed: number }> => {
   console.log('[SyncManager] Starting sync cycle');
-  
+
   if (syncStatus.isRunning) {
     console.warn('[SyncManager] Sync already running, skipping');
     return { synced: 0, failed: 0 };
@@ -118,13 +117,8 @@ export const startAutoSync = (): void => {
 
   console.log('[SyncManager] Starting auto sync with interval:', API_CONFIG.SYNC_INTERVAL, 'ms');
 
-  // Sincronizar al recuperar conexión
-  onlineHandler = () => {
-    console.log('[SyncManager] Device came online — triggering sync');
-    syncPendingRecords();
-  };
-  window.addEventListener('online', onlineHandler);
-
+  // El sync al reconectar lo gestiona swOffline.ts (handleOnline).
+  // Este módulo solo es responsable del ciclo periódico.
   syncIntervalId = window.setInterval(() => {
     if (navigator.onLine) {
       console.log('[SyncManager] Auto sync interval triggered (online)');
@@ -135,16 +129,12 @@ export const startAutoSync = (): void => {
   }, API_CONFIG.SYNC_INTERVAL);
 };
 
-/** Detiene la sincronización automática liberando el intervalo y el listener online. */
+/** Detiene la sincronización automática periódica. */
 export const stopAutoSync = (): void => {
   if (syncIntervalId !== null) {
     console.log('[SyncManager] Stopping auto sync');
     clearInterval(syncIntervalId);
     syncIntervalId = null;
-  }
-  if (onlineHandler !== null) {
-    window.removeEventListener('online', onlineHandler);
-    onlineHandler = null;
   }
 };
 

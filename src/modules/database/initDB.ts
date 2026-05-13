@@ -23,6 +23,12 @@ export const initDB = (): Promise<IDBDatabase> => {
 
     request.onsuccess = () => {
       dbInstance = request.result;
+      // Si otra pestaña inicia una migración de esquema, liberar la conexión
+      // para no bloquear su onupgradeneeded indefinidamente.
+      dbInstance.onversionchange = () => {
+        dbInstance?.close();
+        dbInstance = null;
+      };
       resolve(dbInstance);
     };
 

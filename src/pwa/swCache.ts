@@ -1,12 +1,5 @@
 // Utilidades de Cache para el Cliente
 
-export const CACHE_NAMES = {
-  STATIC: 'battref-static-v1',
-  DYNAMIC: 'battref-dynamic-v1',
-} as const;
-
-export const CACHE_VERSION = 'v1';
-
 export const isCacheAvailable = (): boolean => {
   return 'caches' in window;
 };
@@ -15,8 +8,6 @@ export const isCacheAvailable = (): boolean => {
 export const getCacheSize = async (): Promise<number> => {
   if (!isCacheAvailable()) return 0;
 
-  // Use caches.keys() so this stays correct across SW version bumps.
-  // CACHE_NAMES contains hardcoded version strings that may lag behind the SW.
   const allCacheNames = await caches.keys();
   const battrefCaches = allCacheNames.filter(name => name.startsWith('battref-'));
 

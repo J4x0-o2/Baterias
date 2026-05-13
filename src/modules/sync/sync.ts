@@ -21,7 +21,7 @@ const sendToMonitor = (body: string): void => {
   });
 };
 
-/** Envía un registro individual a Google Sheets con manejo de timeout, parsing numérico y deteccion de errores del servidor. */
+/** Envía un registro individual a Google Sheets con manejo de timeout, parsing numérico y detección de errores del servidor. */
 export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   if (!isApiConfigured()) {
     console.error('[Sync] API not configured - GOOGLE_SHEETS_URL is missing');
@@ -59,14 +59,14 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
     console.log(`[Sync] Response body for record ${record.id}:`, responseText);
 
     // Google Apps Script returns 200 even on errors — check body content
-    let responseData: { status?: string; error?: string } = {};
+    let responseData: { success?: boolean; error?: string } = {};
     try {
       responseData = JSON.parse(responseText);
     } catch {
       // Response is not JSON — treat as success if HTTP 200
     }
 
-    if (responseData.status === 'error' || responseData.error) {
+    if (responseData.success === false || responseData.error) {
       console.error(`[Sync] Apps Script error for record ${record.id}:`, responseData.error || responseText);
       return { success: false, recordId: record.id, error: responseData.error || 'Apps Script error' };
     }
@@ -82,7 +82,9 @@ export const sendRecord = async (record: StoredRecord): Promise<SyncResult> => {
   }
 };
 
-/** Construye el payload numérico de un registro eliminando el flag interno de sincronización. */
+/** Construye el payload numérico de un registro.
+ *  Stripea `synced` (flag interno de IDB) pero mantiene `tipoInspeccion`
+ *  para que Apps Script pueda enrutar a la hoja correcta. */
 function buildPayload(record: StoredRecord) {
   const { synced: _synced, ...fields } = record;
   return {
@@ -138,7 +140,7 @@ const sendBatch = async (records: StoredRecord[]): Promise<boolean> => {
   }
 };
 
-//Envía múltiples registros a Google Sheets.
+/** Envía múltiples registros a Google Sheets. */
 export const sendRecordsWithRetry = async (
   records: StoredRecord[],
   onProgress?: (completed: number, total: number) => void

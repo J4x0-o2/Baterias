@@ -1,4 +1,5 @@
 import { DailyHistoryButton } from '../DailyHistory';
+import idsLogo from '../../assets/IDS_logo.png';
 import './Header.css';
 
 interface HeaderProps {
@@ -11,14 +12,7 @@ export const Header = ({ isOnline }: HeaderProps) => {
     <header className="header">
       <div className="header__brand">
         <div className="header__logo">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="header__icon"
-          >
-            <path d="M17 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2h2v2h6V2h2v2zM5 8v12h14V8H5zm2 3h4v4H7v-4z"/>
-          </svg>
+          <img src={idsLogo} alt="IDS Logo" className="header__logo-img" />
         </div>
         <div className="header__title">
           <h1 className="header__name">Baterias</h1>

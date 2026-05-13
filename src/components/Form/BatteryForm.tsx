@@ -18,11 +18,10 @@ import {
 } from '../Icons';
 import './BatteryForm.css';
 
-/** Opciones del selector de cantidad: 1 a 20 baterías por lote. */
-const quantityOptions = Array.from({ length: 20 }, (_, i) => ({
-  value: String(i + 1),
-  label: String(i + 1),
-}));
+const tipoInspeccionOptions = [
+  { value: 'produccion',    label: 'Baterías - Producción' },
+  { value: 'no-produccion', label: 'Baterías - No Producción' },
+];
 
 /**
  * Formulario de inspección en lote.
@@ -40,12 +39,15 @@ export const BatteryForm = () => {
     fixedData,
     batteries,
     quantity,
+    tipoInspeccion,
+    maxQuantity,
     pendingQuantity,
     saving,
     saveStatus,
     batteryOptions,
     selectedReference,
     isFormValid,
+    handleTipoChange,
     handleFixedFieldChange,
     handleBatteryChange,
     handleQuantityChange,
@@ -57,7 +59,13 @@ export const BatteryForm = () => {
     lastSavedCount,
   } = useBatchBatteryForm();
 
+  // 21 días es el umbral de uso máximo definido por el proceso de mantenimiento de baterías
   const isDiasOutOfRange = parseInt(fixedData.dias, 10) >= 21;
+
+  const quantityOptions = Array.from({ length: maxQuantity }, (_, i) => ({
+    value: String(i + 1),
+    label: String(i + 1),
+  }));
 
   // El selector de cantidad muestra el valor pendiente mientras espera confirmación
   const displayedQuantity = (pendingQuantity ?? quantity).toString();
@@ -68,6 +76,16 @@ export const BatteryForm = () => {
         <h2 className="battery-form__title">Nueva Inspeccion</h2>
 
         <div className="battery-form__fields">
+
+          {/* Tipo de inspección */}
+          <SelectField
+            label="Tipo de inspección"
+            name="tipoInspeccion"
+            value={tipoInspeccion}
+            onChange={handleTipoChange}
+            options={tipoInspeccionOptions}
+            icon={<BatteryIcon />}
+          />
 
           {/* Referencia + botón agregar */}
           <div className="battery-form__reference-row">

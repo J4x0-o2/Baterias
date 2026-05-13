@@ -7,16 +7,3 @@ export const BATTERY_REFERENCES: BatteryReference[] = [
   { id: '2', code: '244103318R', cargaMin: 12.7, cargaMax: 13.00, pesoMin: 16.550, pesoMax: 17.970 },
 ];
 
-/** Retorna opciones de selección con valor y etiqueta a partir de referencias predefinidas. */
-export const getBatteryOptions = (): { value: string; label: string }[] => {
-  return BATTERY_REFERENCES.map(ref => ({
-    value: ref.code,
-    label: ref.description ? `${ref.code} - ${ref.description}` : ref.code,
-  }));
-};
-
-/** Busca y retorna una referencia predefinida por código. */
-export const getBatteryById = (code: string): BatteryReference | undefined => {
-  return BATTERY_REFERENCES.find(ref => ref.code === code);
-};
-

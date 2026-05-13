@@ -68,7 +68,6 @@ export const BatteryRow = ({ index, data, onChange, selectedReference }: Battery
     selectedReference,
     data.voltage,
     data.weight,
-    '0'
   );
 
   return (

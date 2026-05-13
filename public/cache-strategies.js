@@ -1,5 +1,5 @@
-// Cache Configuration
-const CACHE_VERSION = 'v2.0'; // Increment on each build to invalidate cache
+// Cache Configuration — versión inyectada en build por el plugin swVersionPlugin de vite.config.ts
+const CACHE_VERSION = '__SW_BUILD_VERSION__';
 const STATIC_CACHE_NAME = `battref-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `battref-dynamic-${CACHE_VERSION}`;
 

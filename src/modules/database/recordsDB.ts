@@ -100,4 +100,16 @@ export const recordsDB: ISaveLocal = {
       request.onerror = () => reject(request.error);
     });
   },
+
+  async cleanSyncedRecords(olderThanDays: number): Promise<number> {
+    const cutoff = Date.now() - olderThanDays * 24 * 60 * 60 * 1000;
+    const all = await this.getAll();
+    const toDelete = all.filter(r => {
+      if (r.synced !== true) return false;
+      const ts = parseInt(r.id.split('-')[0], 10);
+      return !isNaN(ts) && ts > 0 && ts < cutoff;
+    });
+    await Promise.all(toDelete.map(r => this.delete(r.id)));
+    return toDelete.length;
+  },
 };

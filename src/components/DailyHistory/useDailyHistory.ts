@@ -86,6 +86,7 @@ export const useDailyHistory = () => {
 
   // Refresh when a new record is saved
   useEffect(() => {
+    // Contrato: emitido por useBatchBatteryForm tras guardar exitosamente en IDB.
     window.addEventListener('batteryRecordSaved', refresh);
     return () => window.removeEventListener('batteryRecordSaved', refresh);
   }, [refresh]);

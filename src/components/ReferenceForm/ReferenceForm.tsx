@@ -48,6 +48,20 @@ export const ReferenceForm = ({ isOpen, onClose, onSaved }: ReferenceFormProps) 
       return;
     }
 
+    const cargaMin = formData.cargaMin ? parseFloat(formData.cargaMin) : undefined;
+    const cargaMax = formData.cargaMax ? parseFloat(formData.cargaMax) : undefined;
+    const pesoMin  = formData.pesoMin  ? parseFloat(formData.pesoMin)  : undefined;
+    const pesoMax  = formData.pesoMax  ? parseFloat(formData.pesoMax)  : undefined;
+
+    if (cargaMin !== undefined && cargaMax !== undefined && cargaMin >= cargaMax) {
+      setError('La carga mínima debe ser menor que la máxima');
+      return;
+    }
+    if (pesoMin !== undefined && pesoMax !== undefined && pesoMin >= pesoMax) {
+      setError('El peso mínimo debe ser menor que el máximo');
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -55,10 +69,10 @@ export const ReferenceForm = ({ isOpen, onClose, onSaved }: ReferenceFormProps) 
       const newReference: BatteryReference = {
         id: `custom-${generateId()}`,
         code: formData.code.trim(),
-        cargaMin: formData.cargaMin ? parseFloat(formData.cargaMin) : undefined,
-        cargaMax: formData.cargaMax ? parseFloat(formData.cargaMax) : undefined,
-        pesoMin: formData.pesoMin ? parseFloat(formData.pesoMin) : undefined,
-        pesoMax: formData.pesoMax ? parseFloat(formData.pesoMax) : undefined,
+        cargaMin,
+        cargaMax,
+        pesoMin,
+        pesoMax,
         isCustom: true,
       };
 

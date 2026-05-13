@@ -30,7 +30,7 @@ export const getReferencesForSelect = async (): Promise<{ value: string; label: 
 };
 
 /** Busca y retorna una referencia por código desde todas las referencias disponibles. */
-export const getReferenceById = async (code: string): Promise<BatteryReference | undefined> => {
+export const getReferenceByCode = async (code: string): Promise<BatteryReference | undefined> => {
   const allRefs = await getAllReferences();
   return allRefs.find(ref => ref.code === code);
 };

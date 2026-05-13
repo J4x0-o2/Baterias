@@ -12,6 +12,8 @@ interface Props {
 
 type Tab = 'today' | 'all';
 
+const MAX_ALL_RECORDS = 300;
+
 interface DateGroup {
   dateKey: string;
   dateLabel: string;
@@ -196,6 +198,7 @@ export const DailyHistoryModal = ({ entries, todayCount, onClose }: Props) => {
   const [activeTab, setActiveTab] = useState<Tab>('today');
   const [allGroups, setAllGroups] = useState<DateGroup[]>([]);
   const [loadingAll, setLoadingAll] = useState(false);
+  const [isTruncated, setIsTruncated] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -208,7 +211,14 @@ export const DailyHistoryModal = ({ entries, todayCount, onClose }: Props) => {
     if (activeTab !== 'all') return;
     setLoadingAll(true);
     recordsDB.getAll().then(records => {
-      setAllGroups(groupByDate(records));
+      const sorted = records.sort((a, b) => {
+        const ta = parseInt(a.id.split('-')[0], 10) || 0;
+        const tb = parseInt(b.id.split('-')[0], 10) || 0;
+        return tb - ta;
+      });
+      const truncated = sorted.length > MAX_ALL_RECORDS;
+      setIsTruncated(truncated);
+      setAllGroups(groupByDate(truncated ? sorted.slice(0, MAX_ALL_RECORDS) : sorted));
       setLoadingAll(false);
     });
   }, [activeTab]);
@@ -278,6 +288,8 @@ export const DailyHistoryModal = ({ entries, todayCount, onClose }: Props) => {
             <div className="dh-modal__summary">
               {loadingAll ? (
                 <span>Cargando…</span>
+              ) : isTruncated ? (
+                <span>Mostrando los {MAX_ALL_RECORDS} registros más recientes</span>
               ) : (
                 <span>{totalAllRecords} registro{totalAllRecords !== 1 ? 's' : ''} en total</span>
               )}

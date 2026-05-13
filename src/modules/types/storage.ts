@@ -9,6 +9,8 @@ export interface StoredRecord extends BatteryRecord {
   // Shared by all records of the same form submission; used as idempotency key
   // so Apps Script can skip re-insertion if the same batch arrives twice (e.g. after a timeout retry).
   batchId?: string;
+  // Determines which Apps Script endpoint receives the record on sync.
+  tipoInspeccion: 'produccion' | 'no-produccion';
 }
 
 /** Contrato de servicios para persistencia local de registros de inspección. */
@@ -20,6 +22,8 @@ export interface ISaveLocal {
   getPendingSync(): Promise<StoredRecord[]>;
   markAsSynced(id: string): Promise<void>;
   clearAll(): Promise<void>;
+  /** Elimina registros ya sincronizados con más de `olderThanDays` días. Retorna la cantidad eliminada. */
+  cleanSyncedRecords(olderThanDays: number): Promise<number>;
 }
 
 /** Contrato de servicios para persistencia de referencias de baterías personalizadas. */

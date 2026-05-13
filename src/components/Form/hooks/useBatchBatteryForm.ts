@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getReferencesForSelect, getReferenceById } from '../../../modules/references';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { getReferencesForSelect, getReferenceByCode } from '../../../modules/references';
 import { DEFAULT_FORM_VALUES } from '../../../modules/constants';
 import type { BatteryReference, StoredRecord } from '../../../modules/types';
 import { recordsDB, generateId } from '../../../modules/database';
@@ -10,6 +10,11 @@ import type { BatchFixedData, PerBatteryData, SelectOption, SaveStatus } from '.
 
 /** Devuelve la fecha actual en formato ISO YYYY-MM-DD compatible con inputs tipo date. */
 const getTodayISO = (): string => new Date().toISOString().split('T')[0];
+
+const MAX_QUANTITY: Record<'produccion' | 'no-produccion', number> = {
+  'produccion':    20,
+  'no-produccion': 50,
+};
 
 /** Campos fijos en su estado vacío inicial. Las fechas de sesión se aplican por encima. */
 const initialFixedData: BatchFixedData = {
@@ -48,6 +53,8 @@ export interface UseBatchBatteryFormReturn {
   fixedData: BatchFixedData;
   batteries: PerBatteryData[];
   quantity: number;
+  tipoInspeccion: 'produccion' | 'no-produccion';
+  maxQuantity: number;
   /** Valor distinto de null mientras el operador esperan confirmación de reducción de cantidad. */
   pendingQuantity: number | null;
   /** Cantidad de registros del último lote guardado; útil para el mensaje de éxito. */
@@ -57,6 +64,7 @@ export interface UseBatchBatteryFormReturn {
   batteryOptions: SelectOption[];
   selectedReference: BatteryReference | null;
   isFormValid: boolean;
+  handleTipoChange: (value: string) => void;
   handleFixedFieldChange: (field: keyof BatchFixedData) => (value: string) => void;
   handleBatteryChange: (index: number, field: keyof PerBatteryData) => (value: string) => void;
   /** Incrementa directamente o abre el diálogo de confirmación si la cantidad baja. */
@@ -76,6 +84,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     fechaFabricacion: '',
   });
 
+  const [tipoInspeccion, setTipoInspeccion] = useState<'produccion' | 'no-produccion'>('produccion');
+
   const [fixedData, setFixedData] = useState<BatchFixedData>({
     ...initialFixedData,
     fechaInspeccion: getTodayISO(),
@@ -88,6 +98,7 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [lastSavedCount, setLastSavedCount] = useState(0);
+  const saveStatusTimeoutRef = useRef<number | null>(null);
   const [batteryOptions, setBatteryOptions] = useState<SelectOption[]>([]);
   const [selectedReference, setSelectedReference] = useState<BatteryReference | null>(null);
 
@@ -111,7 +122,7 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
   useEffect(() => {
     const load = async () => {
       if (fixedData.batteryReference) {
-        const ref = await getReferenceById(fixedData.batteryReference);
+        const ref = await getReferenceByCode(fixedData.batteryReference);
         setSelectedReference(ref || null);
       } else {
         setSelectedReference(null);
@@ -119,6 +130,13 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     };
     load();
   }, [fixedData.batteryReference]);
+
+  // Limpia el timeout del mensaje de éxito si el componente se desmonta antes de los 3s
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimeoutRef.current !== null) clearTimeout(saveStatusTimeoutRef.current);
+    };
+  }, []);
 
 
   // Manejadores de campos fijos
@@ -195,6 +213,14 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     setPendingQuantity(null);
   }, []);
 
+  const handleTipoChange = useCallback((value: string) => {
+    const newTipo = value as 'produccion' | 'no-produccion';
+    setTipoInspeccion(newTipo);
+    // Si la cantidad actual supera el máximo del nuevo tipo, la capa de confirmación
+    // de handleQuantityChange se encarga de avisar al operador si hay datos en riesgo.
+    const max = MAX_QUANTITY[newTipo];
+    if (quantity > max) handleQuantityChange(max);
+  }, [quantity, handleQuantityChange]);
 
   // Reset y guardado
   const handleReset = useCallback(() => {
@@ -222,11 +248,13 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
           ...battery,
           id: generateId(),
           batchId,
+          tipoInspeccion,
           synced: false,
         };
         await recordsDB.save(record);
       }
 
+      // Contrato: useDailyHistory escucha este evento para refrescar el historial del día.
       window.dispatchEvent(new CustomEvent('batteryRecordSaved'));
       setLastSavedCount(batteries.length);
       setSaveStatus('success');
@@ -245,7 +273,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
           console.error('[Form] Error triggering sync:', error);
         });
 
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      if (saveStatusTimeoutRef.current !== null) clearTimeout(saveStatusTimeoutRef.current);
+      saveStatusTimeoutRef.current = window.setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
       console.error('Error guardando registros:', error);
       setSaveStatus('error');
@@ -268,6 +297,8 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     fixedData,
     batteries,
     quantity,
+    tipoInspeccion,
+    maxQuantity: MAX_QUANTITY[tipoInspeccion],
     pendingQuantity,
     lastSavedCount,
     saving,
@@ -275,6 +306,7 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     batteryOptions,
     selectedReference,
     isFormValid,
+    handleTipoChange,
     handleFixedFieldChange,
     handleBatteryChange,
     handleQuantityChange,
