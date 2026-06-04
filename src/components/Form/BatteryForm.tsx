@@ -34,6 +34,7 @@ const tipoInspeccionOptions = [
  */
 export const BatteryForm = () => {
   const [showReferenceForm, setShowReferenceForm] = useState(false);
+  const [observacionesTouched, setObservacionesTouched] = useState(false);
 
   const {
     fixedData,
@@ -59,6 +60,16 @@ export const BatteryForm = () => {
     loadBatteryOptions,
     lastSavedCount,
   } = useBatchBatteryForm();
+
+  // Resetea el indicador de touched cuando el formulario se guarda correctamente o se limpia
+  const wrappedReset = () => {
+    setObservacionesTouched(false);
+    handleReset();
+  };
+  const wrappedSave = async () => {
+    await handleSave();
+    setObservacionesTouched(false);
+  };
 
   // 21 días es el umbral de uso máximo definido por el proceso de mantenimiento de baterías
   const isDiasOutOfRange = parseInt(fixedData.dias, 10) >= 21;
@@ -205,12 +216,14 @@ export const BatteryForm = () => {
             icon={<UserIcon />}
           />
           <TextAreaField
-            label="Observaciones"
+            label="Observaciones *"
             name="observaciones"
             placeholder="Escriba observaciones sobre la bateria..."
             value={fixedData.observaciones}
             onChange={handleFixedFieldChange('observaciones')}
+            onBlur={() => setObservacionesTouched(true)}
             icon={<NoteIcon />}
+            hasError={observacionesTouched && !fixedData.observaciones.trim()}
           />
         </div>
 
@@ -243,8 +256,8 @@ export const BatteryForm = () => {
         )}
 
         <FormButtons
-          onReset={handleReset}
-          onSave={handleSave}
+          onReset={wrappedReset}
+          onSave={wrappedSave}
           isSaveDisabled={!isFormValid}
           isLoading={saving}
         />

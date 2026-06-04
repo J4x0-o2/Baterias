@@ -292,6 +292,7 @@ export const useBatchBatteryForm = (): UseBatchBatteryFormReturn => {
     fixedData.fechaInspeccion &&
     fixedData.fechaRecarga &&
     fixedData.inspector &&
+    fixedData.observaciones.trim() &&
     batteries.every(b => b.voltage && (!weightRequired || b.weight))
   );
 

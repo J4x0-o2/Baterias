@@ -130,9 +130,8 @@ Crea un archivo `.env` en la raíz del proyecto:
 # URL principal — Apps Script que enruta a DATOS o DATOS 250 según tipoInspeccion
 VITE_GOOGLE_SHEETS_URL=https://script.google.com/macros/s/XXXXXXXX/exec
 
-#Token API APPSSCRIPT
-BEARER_TOKEN_APPSCRIPT=jwpHSMSoLcv.....
-
+# URL del Apps Script de monitoreo (opcional — hoja copia + notificaciones Telegram)
+VITE_GOOGLE_SHEETS_MONITOR_URL=https://script.google.com/macros/s/YYYYYYYY/exec
 ```
 
 > Ambas Web Apps deben publicarse con acceso **"Cualquier persona"** y modo de ejecución como el usuario del despliegue.
@@ -162,7 +161,7 @@ npm run deploy
 | Variable | Requerida | Descripción |
 |---|---|---|
 | `VITE_GOOGLE_SHEETS_URL` | Sí | URL del Apps Script principal. Maneja Producción y No Producción en un solo endpoint. |
-| `BEARER_TOKEN_APPSCRIPT`| Sí | Token de seguridad. |
+| `VITE_GOOGLE_SHEETS_MONITOR_URL` | No | URL del Apps Script de monitoreo. Inserta en hoja copia y notifica por Telegram (fire-and-forget). |
 ---
 
 ## Apps Script

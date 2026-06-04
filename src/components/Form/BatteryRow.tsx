@@ -39,12 +39,31 @@ const TogglePill = ({ label, options, value, onChange }: TogglePillProps) => {
 
 
 // Helpers
-/** Trunca la parte decimal de un string numérico al máximo de dígitos indicado. */
-function limitDecimals(value: string, max: number): string {
-  const dotIndex = value.indexOf('.');
-  if (dotIndex === -1) return value;
-  const decimals = value.slice(dotIndex + 1);
-  if (decimals.length > max) return value.slice(0, dotIndex + max + 1);
+/** Sanitiza entrada decimal: reemplaza coma por punto, descarta caracteres no numéricos,
+ *  mantiene solo el primer punto, auto-inserta el punto después del 2.º dígito entero si
+ *  el usuario ya escribió más de 2 dígitos sin punto, y trunca los decimales al máximo. */
+function sanitizeDecimalInput(value: string, maxDecimals: number): string {
+  let v = value.replace(',', '.').replace(/[^\d.]/g, '');
+  // Conservar solo el primer punto
+  const firstDot = v.indexOf('.');
+  if (firstDot !== -1) {
+    v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
+  }
+  // Auto-insertar punto después del 2.º dígito si no hay punto y hay más de 2 dígitos
+  if (!v.includes('.') && v.length > 2) {
+    v = v.slice(0, 2) + '.' + v.slice(2);
+  }
+  // Truncar decimales al máximo permitido
+  const dotIdx = v.indexOf('.');
+  if (dotIdx !== -1 && v.slice(dotIdx + 1).length > maxDecimals) {
+    v = v.slice(0, dotIdx + maxDecimals + 1);
+  }
+  return v;
+}
+
+/** Si al perder el foco el valor es un entero válido sin punto, agrega ".0". */
+function ensureDecimal(value: string): string {
+  if (value && !value.includes('.') && /^\d+$/.test(value)) return value + '.0';
   return value;
 }
 
@@ -116,24 +135,32 @@ export const BatteryRow = ({ index, data, onChange, selectedReference, weightReq
       <div className="battery-row__measurements">
         <div className={`battery-row__input-group ${isCargaOutOfRange ? 'battery-row__input-group--error' : ''}`}>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="battery-row__input"
             placeholder="Carga"
             value={data.voltage}
-            onChange={(e) => onChange('voltage', limitDecimals(e.target.value, 2))}
-            step="0.01"
+            onChange={(e) => onChange('voltage', sanitizeDecimalInput(e.target.value, 2))}
+            onBlur={(e) => {
+              const fixed = ensureDecimal(e.target.value);
+              if (fixed !== e.target.value) onChange('voltage', fixed);
+            }}
             aria-label={`Carga batería ${index + 1}`}
           />
           <span className="battery-row__unit">V</span>
         </div>
         <div className={`battery-row__input-group ${isPesoOutOfRange ? 'battery-row__input-group--error' : ''}`}>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className="battery-row__input"
             placeholder={weightRequired ? 'Peso' : 'Peso (opcional)'}
             value={data.weight}
-            onChange={(e) => onChange('weight', limitDecimals(e.target.value, 3))}
-            step="0.001"
+            onChange={(e) => onChange('weight', sanitizeDecimalInput(e.target.value, 3))}
+            onBlur={(e) => {
+              const fixed = ensureDecimal(e.target.value);
+              if (fixed !== e.target.value) onChange('weight', fixed);
+            }}
             aria-label={`Peso batería ${index + 1}`}
           />
           <span className="battery-row__unit">kg</span>

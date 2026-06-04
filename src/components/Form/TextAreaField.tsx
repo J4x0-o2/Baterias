@@ -6,8 +6,10 @@ interface TextAreaFieldProps {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   icon?: React.ReactNode;
   rows?: number;
+  hasError?: boolean;
 }
 
 /** Campo de área de texto con etiqueta, icono, placeholder y configuración de filas. */
@@ -17,8 +19,10 @@ export const TextAreaField = ({
   placeholder,
   value,
   onChange,
+  onBlur,
   icon,
-  rows = 3
+  rows = 3,
+  hasError = false,
 }: TextAreaFieldProps) => {
   return (
     <div className="form-field">
@@ -29,10 +33,11 @@ export const TextAreaField = ({
       <textarea
         id={name}
         name={name}
-        className="form-field__textarea"
+        className={`form-field__textarea${hasError ? ' form-field__textarea--error' : ''}`}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         rows={rows}
       />
     </div>
