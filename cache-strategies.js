@@ -1,5 +1,5 @@
 // Cache Configuration — versión inyectada en build por el plugin swVersionPlugin de vite.config.ts
-const CACHE_VERSION = 'v1778689949956';
+const CACHE_VERSION = 'v1780600370536';
 const STATIC_CACHE_NAME = `battref-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `battref-dynamic-${CACHE_VERSION}`;
 
