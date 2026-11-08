@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-label="Animación: un inspector registra un lote de baterías sin conexión, los registros quedan en el dispositivo y se sincronizan con Google Sheets al volver la red, sin duplicar lotes.">
+  <style>
+    :root { --bg:#F4F6F9; --card:#FFFFFF; --line:#D3D9E1; --ink:#17202B; --muted:#566170; --accent:#0B6BCB; --amber:#9A6412; --green:#15803D; --soft:#E8EEF6; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0F141A; --card:#1A212A; --line:#343F4C; --ink:#EEF2F6; --muted:#A7B2BF; --accent:#62ADF2; --amber:#E3AD48; --green:#57D98A; --soft:#24303D; }
+    }
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--ink); }
+    .bg { fill: var(--bg); }
+    .card { fill: var(--card); stroke: var(--line); stroke-width: 1; }
+    .rule { stroke: var(--line); stroke-width: 1; }
+    .title { font-size: 17px; font-weight: 600; }
+    .sub, .label { font-size: 13px; fill: var(--muted); }
+    .value { font-size: 14px; font-weight: 600; text-anchor: end; }
+    .name { font-size: 14px; font-weight: 600; }
+    .cell { font-size: 13px; }
+    .head { font-size: 12px; font-weight: 600; fill: var(--muted); }
+    .pend { font-size: 12px; font-weight: 600; fill: var(--amber); }
+    .done { font-size: 12px; font-weight: 600; fill: var(--green); }
+    .bat { fill: var(--accent); }
+    .caption { font-size: 20px; font-weight: 600; text-anchor: middle; letter-spacing: -0.01em; }
+    .pill { fill: var(--card); stroke: var(--line); }
+    .pilltext { font-size: 13px; font-weight: 600; text-anchor: middle; }
+    .btn { fill: var(--soft); }
+    .btntext { font-size: 14px; font-weight: 600; text-anchor: middle; fill: var(--accent); }
+    .press { fill: var(--accent); }
+    .off { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 6; }
+    .on { stroke: var(--accent); stroke-width: 3; }
+    .link { stroke: var(--line); stroke-width: 2; }
+
+    .a { animation-duration: 14s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    #scene { animation-name: scene; }
+    #v1 { animation-name: v1; } #v2 { animation-name: v2; } #v3 { animation-name: v3; } #v4 { animation-name: v4; }
+    #press { animation-name: press; opacity: 0; }
+    #f1 { animation-name: f1; opacity: 0; } #f2 { animation-name: f2; opacity: 0; } #f3 { animation-name: f3; opacity: 0; }
+    #s1 { animation-name: s1; } #s2 { animation-name: s2; } #s3 { animation-name: s3; }
+    #p1 { animation-name: p1; opacity: 0; } #p2 { animation-name: p2; opacity: 0; } #p3 { animation-name: p3; opacity: 0; }
+    #d1 { animation-name: d1; } #d2 { animation-name: d2; } #d3 { animation-name: d3; }
+    #offp { animation-name: offp; opacity: 0; } #onp { animation-name: onp; } #onl { animation-name: onp; }
+    #y1 { animation-name: y1; opacity: 0; } #y2 { animation-name: y2; opacity: 0; } #y3 { animation-name: y3; opacity: 0; }
+    #r1 { animation-name: r1; } #r2 { animation-name: r2; } #r3 { animation-name: r3; }
+    #dupf { animation-name: dupf; opacity: 0; } #dupp { animation-name: dupp; }
+    #c1 { animation-name: c1; opacity: 0; } #c2 { animation-name: c2; opacity: 0; } #c3 { animation-name: c3; opacity: 0; } #c4 { animation-name: c4; }
+
+    @keyframes scene { 0% { opacity: 0; } 2%, 96% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes v1 { 0%, 5% { opacity: 0; } 8%, 100% { opacity: 1; } }
+    @keyframes v2 { 0%, 10% { opacity: 0; } 13%, 100% { opacity: 1; } }
+    @keyframes v3 { 0%, 15% { opacity: 0; } 18%, 100% { opacity: 1; } }
+    @keyframes v4 { 0%, 20% { opacity: 0; } 23%, 100% { opacity: 1; } }
+    @keyframes press { 0%, 25% { opacity: 0; } 27%, 29% { opacity: .22; } 31%, 100% { opacity: 0; } }
+
+    @keyframes f1 { 0%, 29% { opacity: 0; transform: translate(150px, 278px); } 30% { opacity: 1; transform: translate(150px, 278px); } 36% { opacity: 1; transform: translate(384px, 130px); } 37%, 100% { opacity: 0; transform: translate(384px, 130px); } }
+    @keyframes f2 { 0%, 33% { opacity: 0; transform: translate(150px, 278px); } 34% { opacity: 1; transform: translate(150px, 278px); } 40% { opacity: 1; transform: translate(384px, 190px); } 41%, 100% { opacity: 0; transform: translate(384px, 190px); } }
+    @keyframes f3 { 0%, 37% { opacity: 0; transform: translate(150px, 278px); } 38% { opacity: 1; transform: translate(150px, 278px); } 44% { opacity: 1; transform: translate(384px, 250px); } 45%, 100% { opacity: 0; transform: translate(384px, 250px); } }
+    @keyframes s1 { 0%, 36% { opacity: 0; } 37%, 100% { opacity: 1; } }
+    @keyframes s2 { 0%, 40% { opacity: 0; } 41%, 100% { opacity: 1; } }
+    @keyframes s3 { 0%, 44% { opacity: 0; } 45%, 100% { opacity: 1; } }
+
+    @keyframes p1 { 0%, 36% { opacity: 0; } 37%, 59% { opacity: 1; } 60%, 100% { opacity: 0; } }
+    @keyframes p2 { 0%, 40% { opacity: 0; } 41%, 64% { opacity: 1; } 65%, 100% { opacity: 0; } }
+    @keyframes p3 { 0%, 44% { opacity: 0; } 45%, 69% { opacity: 1; } 70%, 100% { opacity: 0; } }
+    @keyframes d1 { 0%, 60% { opacity: 0; } 61%, 100% { opacity: 1; } }
+    @keyframes d2 { 0%, 65% { opacity: 0; } 66%, 100% { opacity: 1; } }
+    @keyframes d3 { 0%, 70% { opacity: 0; } 71%, 100% { opacity: 1; } }
+
+    @keyframes offp { 0%, 49% { opacity: 1; } 51%, 100% { opacity: 0; } }
+    @keyframes onp { 0%, 50% { opacity: 0; } 52%, 100% { opacity: 1; } }
+
+    @keyframes y1 { 0%, 55% { opacity: 0; transform: translate(530px, 130px); } 56% { opacity: 1; transform: translate(530px, 130px); } 61% { opacity: 1; transform: translate(700px, 147px); } 62%, 100% { opacity: 0; transform: translate(700px, 147px); } }
+    @keyframes y2 { 0%, 60% { opacity: 0; transform: translate(530px, 190px); } 61% { opacity: 1; transform: translate(530px, 190px); } 66% { opacity: 1; transform: translate(700px, 181px); } 67%, 100% { opacity: 0; transform: translate(700px, 181px); } }
+    @keyframes y3 { 0%, 65% { opacity: 0; transform: translate(530px, 250px); } 66% { opacity: 1; transform: translate(530px, 250px); } 71% { opacity: 1; transform: translate(700px, 215px); } 72%, 100% { opacity: 0; transform: translate(700px, 215px); } }
+    @keyframes r1 { 0%, 61% { opacity: 0; } 62%, 100% { opacity: 1; } }
+    @keyframes r2 { 0%, 66% { opacity: 0; } 67%, 100% { opacity: 1; } }
+    @keyframes r3 { 0%, 71% { opacity: 0; } 72%, 100% { opacity: 1; } }
+
+    @keyframes dupf { 0%, 77% { opacity: 0; transform: translate(586px, 180px); } 78% { opacity: 1; transform: translate(586px, 180px); } 83% { opacity: 1; transform: translate(652px, 180px); } 87% { opacity: 0; transform: translate(606px, 180px); } 100% { opacity: 0; transform: translate(606px, 180px); } }
+    @keyframes dupp { 0%, 83% { opacity: 0; } 85%, 100% { opacity: 1; } }
+
+    @keyframes c1 { 0%, 1% { opacity: 0; } 3%, 27% { opacity: 1; } 29%, 100% { opacity: 0; } }
+    @keyframes c2 { 0%, 29% { opacity: 0; } 31%, 48% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes c3 { 0%, 50% { opacity: 0; } 52%, 75% { opacity: 1; } 77%, 100% { opacity: 0; } }
+    @keyframes c4 { 0%, 77% { opacity: 0; } 79%, 100% { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) { .a { animation: none !important; } }
+  </style>
+
+  <defs>
+    <g id="battery">
+      <rect class="bat" x="6" y="0" width="7" height="5" rx="1"/>
+      <rect class="bat" x="23" y="0" width="7" height="5" rx="1"/>
+      <rect class="bat" x="0" y="4" width="36" height="20" rx="4"/>
+    </g>
+  </defs>
+
+  <rect class="bg" width="960" height="420" rx="18"/>
+
+  <g id="scene" class="a">
+    <!-- Network status -->
+    <g id="offp" class="a">
+      <rect class="pill" x="410" y="16" width="140" height="30" rx="15"/>
+      <circle cx="432" cy="31" r="5" fill="var(--amber)"/>
+      <text class="pilltext" x="488" y="36">Sin conexión</text>
+    </g>
+    <g id="onp" class="a">
+      <rect class="pill" x="410" y="16" width="140" height="30" rx="15"/>
+      <circle cx="436" cy="31" r="5" fill="var(--green)"/>
+      <text class="pilltext" x="488" y="36">Conectado</text>
+    </g>
+
+    <!-- Connectors -->
+    <line class="link" x1="280" y1="192" x2="360" y2="192"/>
+    <line class="off" x1="600" y1="192" x2="680" y2="192"/>
+    <line id="onl" class="on a" x1="600" y1="192" x2="680" y2="192"/>
+
+    <!-- Inspection form -->
+    <rect class="card" x="40" y="60" width="240" height="264" rx="16"/>
+    <text class="title" x="60" y="92">Inspección</text>
+    <text class="sub" x="60" y="111">Baterías · Producción</text>
+    <text class="label" x="60" y="146">Referencia</text>
+    <text id="v1" class="value a" x="260" y="146">NS40</text>
+    <line class="rule" x1="60" y1="158" x2="260" y2="158"/>
+    <text class="label" x="60" y="182">Carga</text>
+    <text id="v2" class="value a" x="260" y="182">12,6 V</text>
+    <line class="rule" x1="60" y1="194" x2="260" y2="194"/>
+    <text class="label" x="60" y="218">Peso</text>
+    <text id="v3" class="value a" x="260" y="218">11,8 kg</text>
+    <line class="rule" x1="60" y1="230" x2="260" y2="230"/>
+    <text class="label" x="60" y="254">Bornes</text>
+    <text id="v4" class="value a" x="260" y="254">Conformes</text>
+    <rect class="btn" x="60" y="272" width="200" height="36" rx="10"/>
+    <rect id="press" class="press a" x="60" y="272" width="200" height="36" rx="10"/>
+    <text class="btntext" x="160" y="295">Guardar lote</text>
+
+    <!-- Device storage -->
+    <rect class="card" x="360" y="60" width="240" height="264" rx="16"/>
+    <text class="title" x="380" y="92">En el dispositivo</text>
+    <text class="sub" x="380" y="111">IndexedDB</text>
+    <g id="s1" class="a">
+      <use href="#battery" x="384" y="130"/>
+      <text class="name" x="432" y="142">Batería 01</text>
+    </g>
+    <text id="p1" class="pend a" x="432" y="160">Pendiente</text>
+    <text id="d1" class="done a" x="432" y="160">Sincronizada</text>
+    <g id="s2" class="a">
+      <use href="#battery" x="384" y="190"/>
+      <text class="name" x="432" y="202">Batería 02</text>
+    </g>
+    <text id="p2" class="pend a" x="432" y="220">Pendiente</text>
+    <text id="d2" class="done a" x="432" y="220">Sincronizada</text>
+    <g id="s3" class="a">
+      <use href="#battery" x="384" y="250"/>
+      <text class="name" x="432" y="262">Batería 03</text>
+    </g>
+    <text id="p3" class="pend a" x="432" y="280">Pendiente</text>
+    <text id="d3" class="done a" x="432" y="280">Sincronizada</text>
+
+    <!-- Google Sheets -->
+    <rect class="card" x="680" y="60" width="240" height="264" rx="16"/>
+    <text class="title" x="700" y="92">Google Sheets</text>
+    <text class="sub" x="700" y="111">Hoja DATOS</text>
+    <text class="head" x="700" y="136">Batería</text>
+    <text class="head" x="788" y="136">Carga</text>
+    <text class="head" x="856" y="136">Peso</text>
+    <line class="rule" x1="700" y1="144" x2="900" y2="144"/>
+    <g id="r1" class="a">
+      <text class="cell" x="700" y="166">01</text><text class="cell" x="788" y="166">12,6 V</text><text class="cell" x="856" y="166">11,8 kg</text>
+    </g>
+    <line class="rule" x1="700" y1="178" x2="900" y2="178"/>
+    <g id="r2" class="a">
+      <text class="cell" x="700" y="200">02</text><text class="cell" x="788" y="200">12,4 V</text><text class="cell" x="856" y="200">11,9 kg</text>
+    </g>
+    <line class="rule" x1="700" y1="212" x2="900" y2="212"/>
+    <g id="r3" class="a">
+      <text class="cell" x="700" y="234">03</text><text class="cell" x="788" y="234">12,7 V</text><text class="cell" x="856" y="234">11,7 kg</text>
+    </g>
+    <line class="rule" x1="700" y1="246" x2="900" y2="246"/>
+    <g id="dupp" class="a">
+      <rect x="700" y="268" width="200" height="36" rx="10" fill="var(--soft)"/>
+      <text class="pilltext" x="800" y="291" style="fill: var(--muted)">Lote repetido omitido</text>
+    </g>
+
+    <!-- Moving batteries -->
+    <use id="f1" class="a" href="#battery"/>
+    <use id="f2" class="a" href="#battery"/>
+    <use id="f3" class="a" href="#battery"/>
+    <use id="y1" class="a" href="#battery"/>
+    <use id="y2" class="a" href="#battery"/>
+    <use id="y3" class="a" href="#battery"/>
+    <use id="dupf" class="a" href="#battery"/>
+
+    <!-- Captions -->
+    <text id="c1" class="caption a" x="480" y="378">1. Sin señal, el inspector registra el lote</text>
+    <text id="c2" class="caption a" x="480" y="378">2. Los registros quedan guardados en el dispositivo</text>
+    <text id="c3" class="caption a" x="480" y="378">3. Al volver la conexión, se sincronizan con Google Sheets</text>
+    <text id="c4" class="caption a" x="480" y="378">4. Si un lote llega dos veces, no se duplica</text>
+  </g>
+</svg>

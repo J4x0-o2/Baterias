@@ -2,6 +2,8 @@
 
 Aplicación web progresiva (PWA) para el registro e inspección técnica de baterías industriales. Funciona completamente **sin conexión** y sincroniza los datos automáticamente con Google Sheets cuando hay red disponible.
 
+![Animación: un inspector registra un lote de baterías sin conexión, los registros quedan en el dispositivo y se sincronizan con Google Sheets al volver la red, sin duplicar lotes.](diagrams/baterias-sync.svg)
+
 ---
 
 ## ¿Qué es?
